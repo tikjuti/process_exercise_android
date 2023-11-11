@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_height="match_parent"
+    android:layout_width="match_parent"
+    android:orientation="vertical"
+    android:background="?android:colorPrimary"
+    android:weightSum="4">
+    <LinearLayout
+        android:layout_weight="0.5"
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:weightSum="3">
+        <ImageButton
+            android:id="@+id/addUndoButton"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="start|center"
+            android:layout_marginLeft="5dp"
+            android:layout_marginTop="2dp"
+            android:layout_weight="0.25"
+            android:background="?android:colorPrimary"
+            android:src="@drawable/goback" />
+        <TextView
+            android:layout_weight="2"
+            android:layout_width="0dp"
+            android:layout_gravity="start|center"
+            android:layout_height="wrap_content"
+            android:textColor="@color/white"
+            android:textSize="24sp"
+            android:paddingLeft="10dp"
+            android:text="Create note">
+        </TextView>
+<!--        <ImageButton-->
+<!--            android:layout_gravity="end|center"-->
+<!--            android:layout_weight="0.25"-->
+<!--            android:id="@+id/btnRemind"-->
+<!--            android:layout_width="0dp"-->
+<!--            android:layout_height="24dp"-->
+<!--            android:layout_marginLeft="20dp"-->
+<!--            android:background="?android:selectableItemBackgroundBorderless"-->
+<!--            android:contentDescription="Remind Later"-->
+<!--            android:src="@drawable/ic_more_time" />-->
+        <ImageButton
+            android:layout_weight="0.25"
+            android:id="@+id/btnInsertImage"
+            android:layout_width="0dp"
+            android:layout_height="24dp"
+            android:layout_gravity="end|center"
+            android:background="?android:selectableItemBackgroundBorderless"
+            android:contentDescription="Insert Image"
+            android:src="@drawable/ic_image" />
+        <ImageButton
+            android:layout_weight="0.5"
+            android:layout_gravity="start|center"
+            android:id="@+id/btnSaveNote"
+            android:layout_width="0dp"
+            android:layout_height="24dp"
+            android:background="?android:selectableItemBackgroundBorderless"
+            android:contentDescription="Save Note"
+            android:src="@drawable/ic_save_outline" />
+    </LinearLayout>
+
+    <EditText
+        android:layout_weight="0.25"
+        android:id="@+id/addNoteTitle"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_margin="4dp"
+        android:background="@color/white"
+        android:gravity="start|center_vertical"
+        android:hint="Write your title"
+        android:importantForAutofill="no"
+        android:inputType="text"
+        android:maxLines="1"
+        android:paddingLeft="8dp"
+        android:textAlignment="gravity"
+        android:textColor="@color/black"
+        android:textSize="20dp" />
+    <LinearLayout
+        android:layout_weight="3.25"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:weightSum="2"
+        android:orientation="vertical"
+        android:layout_marginStart="4dp"
+        android:layout_marginTop="4dp"
+        android:layout_marginEnd="4dp"
+        android:layout_marginBottom="4dp">
+        <EditText
+            android:layout_weight="0.25"
+            android:id="@+id/addNoteContent"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:background="@color/white"
+            android:gravity="top|start"
+            android:hint="Write your content here."
+            android:importantForAutofill="no"
+            android:inputType="textMultiLine"
+            android:padding="8dp"
+            android:textAlignment="textStart"
+            android:textColor="@color/black">
+        </EditText>
+        <ImageView
+            android:id="@+id/noteImage"
+            android:background="@color/white"
+            android:layout_weight="1.75"
+            android:layout_width="match_parent"
+            android:layout_height="0dp">
+        </ImageView>
+    </LinearLayout>
+</LinearLayout>
