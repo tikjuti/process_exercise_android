@@ -3,9 +3,15 @@ package com.tikjuti.bai2;
 import static android.R.*;
 import static android.R.string.*;
 
+import android.app.AlarmManager;
 import android.app.AlertDialog;
+import android.app.PendingIntent;
+import android.content.ContentValues;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
@@ -27,6 +33,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Calendar;
+import java.util.List;
 import java.util.Locale;
 
 public class UpdateNote extends AppCompatActivity {
@@ -44,6 +51,7 @@ public class UpdateNote extends AppCompatActivity {
     private TimePicker pkrTime;
     private Locale curLocale;
     private static final int REQ_PICK_IMAGE = 1;
+    private static final int REQ_REMINDER = 3;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -95,7 +103,7 @@ public class UpdateNote extends AppCompatActivity {
                             .setPositiveButton("OK", new DialogInterface.OnClickListener() {
                                 @Override
                                 public void onClick(DialogInterface dialog, int which) {
-                                    // Xử lý khi người dùng chọn "OK"
+                                    handlePositiveButtonClick();
                                 }
                             })
                             .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
@@ -177,5 +185,47 @@ public class UpdateNote extends AppCompatActivity {
         }
 
         super.onActivityResult(requestCode, resultCode, data);
+    }
+
+    private void handlePositiveButtonClick() {
+        Calendar instance = Calendar.getInstance(curLocale);
+        Calendar set = (Calendar) instance.clone();
+        int hour, minute;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            hour = pkrTime.getHour();
+            minute = pkrTime.getMinute();
+        } else {
+            hour = pkrTime.getCurrentHour();
+            minute = pkrTime.getCurrentMinute();
+        }
+        set.set(pkrDate.getYear(), pkrDate.getMonth(), pkrDate.getDayOfMonth(), hour, minute, 5);
+        if (set.compareTo(instance) < 0) {
+            Toast.makeText(UpdateNote.this, "Bạn không được phép đặt thời gian nhắc nhở trong quá khứ!", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        long millis = set.getTimeInMillis();
+        NoteAdapter adapter = new NoteAdapter();
+        
+        Bundle bundle = getIntent().getExtras();
+        int id = bundle.getInt("id");
+
+        ContentValues values = new ContentValues();
+        values.put("Reminder", millis);
+
+        SQLiteDatabase db = database.getReadableDatabase();
+        db.update("Notes", values, "Id = ?", new String[]{String.valueOf(id)});
+        adapter.notifyDataSetChanged();
+        Context context = UpdateNote.this;
+        Intent intent = new Intent(context, MyBroadcastReceiver.class);
+        Uri parse = Uri.parse("nre-time:" + millis);
+        intent.setData(parse);
+        PendingIntent broadcast = PendingIntent.getBroadcast(context, REQ_REMINDER, intent,
+                Build.VERSION.SDK_INT >= Build.VERSION_CODES.M
+                        ? PendingIntent.FLAG_ONE_SHOT | PendingIntent.FLAG_IMMUTABLE
+                        : PendingIntent.FLAG_ONE_SHOT);
+        ((AlarmManager) context.getSystemService(ALARM_SERVICE))
+                .set(AlarmManager.RTC_WAKEUP, System.currentTimeMillis() - instance.getTimeInMillis() + millis,
+                        broadcast);
+        Toast.makeText(this, "Đã đặt hẹn giờ thông báo!", Toast.LENGTH_SHORT).show();
     }
 }

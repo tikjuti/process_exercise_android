@@ -8,6 +8,7 @@ public class Note {
     private String content;
     private byte[] imagePath;
     private String dateTime;
+    private Long reminder;
 
     public Note(int id, String title, String content, byte[] imagePath, String dateTime) {
         this.id = id;
@@ -15,12 +16,21 @@ public class Note {
         this.content = content;
         this.imagePath = imagePath;
         this.dateTime = dateTime;
+        this.reminder = 0L;
     }
 
     public Note() {}
 
     public int getId() {
         return id;
+    }
+
+    public Long getReminder() {
+        return reminder;
+    }
+
+    public void setReminder(Long reminder) {
+        this.reminder = reminder;
     }
 
     public void setId(int id) {

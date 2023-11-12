@@ -24,6 +24,12 @@ public class NoteAdapter extends BaseAdapter {
         this.noteList = noteList;
     }
 
+    public NoteAdapter() {}
+
+    public List<Note> getNoteList() {
+        return noteList;
+    }
+
     @Override
     public int getCount() {
         return noteList.size();
@@ -44,7 +50,6 @@ public class NoteAdapter extends BaseAdapter {
         TextView txtTextTime;
         TextView txtTextContent;
         LinearLayout itemList;
-        ImageView noteImage;
     }
 
     @Override
@@ -58,7 +63,6 @@ public class NoteAdapter extends BaseAdapter {
             viewHolder.txtTextTime = (TextView) view.findViewById(R.id.txtTextTime);
             viewHolder.txtTextContent = (TextView) view.findViewById(R.id.txtTextContent);
             viewHolder.itemList = (LinearLayout) view.findViewById(R.id.itemList);
-            viewHolder.noteImage = view.findViewById(R.id.noteEditImage);
 
             view.setTag(viewHolder);
         } else {

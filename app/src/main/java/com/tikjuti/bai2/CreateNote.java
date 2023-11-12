@@ -101,12 +101,10 @@ public class CreateNote extends AppCompatActivity {
                         imagePath = byteArray.toByteArray();
                     }
                 }
-//
                 if (title.equals("") || content.equals("")) {
                     Toast.makeText(CreateNote.this, "Vui lòng nhập đầy đủ các mục", Toast.LENGTH_SHORT).show();
                     return;
                 }
-
                 database.insertData(title, content, imagePath, dateTime);
                 Toast.makeText(CreateNote.this, "Đã thêm", Toast.LENGTH_LONG).show();
                 MainNote.getTitleData();

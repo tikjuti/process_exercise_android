@@ -8,7 +8,7 @@ import android.database.sqlite.SQLiteStatement;
 public class Database extends SQLiteOpenHelper {
 
     private static final String DATABASE_NAME = "sqlite.db";
-    private static final int DATABASE_VERSION = 2;
+    private static final int DATABASE_VERSION = 3;
 
     public static final String TABLE_NOTES = "Notes";
     public static final String COLUMN_ID = "Id";
@@ -16,14 +16,16 @@ public class Database extends SQLiteOpenHelper {
     public static final String COLUMN_CONTENT = "Content";
     public static final String COLUMN_IMAGE_PATH = "ImagePath";
     public static final String COLUMN_DATE_TIME = "DateTime";
-//    public static final String COLUMN_ALARM_TIME = "AlarmTime";
+    public static final String COLUMN_REMINDER = "Reminder";
+    public static final Long DEFAUlT_TIME = 0L;
     private static final String TABLE_CREATE =
             "CREATE TABLE IF NOT EXISTS " + TABLE_NOTES + " (" +
                     COLUMN_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
                     COLUMN_TITLE + " VARCHAR(255), " +
                     COLUMN_CONTENT + " TEXT, " +
                     COLUMN_IMAGE_PATH + " BLOB, " +
-                    COLUMN_DATE_TIME + " DATETIME " +
+                    COLUMN_DATE_TIME + " DATETIME, " +
+                    COLUMN_REMINDER + " LONG DEFAULT 0" +
                     ");";
 
     public Database(Context context) {
@@ -42,7 +44,7 @@ public class Database extends SQLiteOpenHelper {
 
     public void insertData(String title,String content,byte[] image,String dateTime) {
         SQLiteDatabase db = getWritableDatabase();
-        String sql = "INSERT INTO Notes VALUES(null, ?, ?, ?, ?)";
+        String sql = "INSERT INTO Notes VALUES(null, ?, ?, ?, ?, ?)";
         SQLiteStatement statement = db.compileStatement(sql);
         statement.clearBindings();
 
@@ -50,6 +52,7 @@ public class Database extends SQLiteOpenHelper {
         statement.bindString(2, content);
         statement.bindBlob(3, image);
         statement.bindString(4, dateTime);
+        statement.bindLong(5, DEFAUlT_TIME);
 
         statement.executeInsert();
     }

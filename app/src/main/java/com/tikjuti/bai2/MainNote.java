@@ -20,6 +20,7 @@ import java.util.Date;
 public class MainNote extends AppCompatActivity {
 
     ImageButton btnAddNote;
+    ImageButton moreInfoButton;
     ListView listNote;
     static Database database;
 
@@ -32,10 +33,16 @@ public class MainNote extends AppCompatActivity {
         setContentView(R.layout.main_note);
 
         database = new Database(this);
-//        SQLiteDatabase db = database.getWritableDatabase();
-//        db.delete("Notes", null,null);
 
         btnAddNote = findViewById(R.id.addNoteButton);
+        moreInfoButton = findViewById(R.id.btnMoreInfo);
+
+        moreInfoButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Toast.makeText(MainNote.this, "More information", Toast.LENGTH_SHORT).show();
+            }
+        });
         btnAddNote.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
