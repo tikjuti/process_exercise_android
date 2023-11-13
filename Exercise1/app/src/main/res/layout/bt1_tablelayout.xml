@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<TableLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:stretchColumns="*"
+    tools:context=".TableLayout">
+
+    <TableRow android:layout_weight="1">
+        <TableLayout
+            android:layout_column="0"
+            android:layout_span="2">
+            <View
+                android:id="@+id/column_one_one"
+                android:layout_width="match_parent"
+                android:layout_weight="1"
+                android:background="#567811" />
+            <View
+                android:id="@+id/column_one_two"
+                android:layout_width="match_parent"
+                android:layout_weight="1"
+                android:background="#876511" />
+        </TableLayout>
+        <TableLayout
+            android:layout_column="2"
+            android:layout_span="3">
+            <View
+                android:id="@+id/column_two_one"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:background="#654311"></View>
+            <View
+                android:id="@+id/column_two_two"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:background="#159711"></View>
+            <View
+                android:id="@+id/column_two_three"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:background="#953111"></View>
+        </TableLayout>
+    </TableRow>
+    <SeekBar
+        android:id="@+id/seek_bar"
+        android:layout_width="match_parent"
+        android:layout_height="30dp"
+        android:max="99"
+        android:min="11"
+        android:progress="0"></SeekBar>
+</TableLayout>

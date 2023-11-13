@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:padding="10dp"
+    android:orientation="vertical">
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Created by Group 1"
+        android:textSize="22sp"
+        ></TextView>
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Members"
+        android:textSize="18sp"
+        android:layout_marginTop="10dp"
+        android:paddingHorizontal="20dp"
+        ></TextView>
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_marginTop="10dp"
+            android:paddingHorizontal="40dp"
+            >
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Bùi Hồng Bảo - 3121410066"
+                android:textSize="14sp"
+                android:paddingVertical="10dp"
+                ></TextView>
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Nguyễn Tiến Phát - 3121410379"
+                android:textSize="14sp"
+                android:paddingVertical="10dp"
+                ></TextView>
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Tăng Quốc Tuấn - 3121410562"
+                android:textSize="14sp"
+                android:paddingVertical="10dp"
+                ></TextView>
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Lê Gia Cường - 3121410096"
+                android:textSize="14sp"
+                android:paddingVertical="10dp"
+                ></TextView>
+
+        </LinearLayout>
+</LinearLayout>
