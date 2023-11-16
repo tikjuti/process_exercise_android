@@ -1,12 +1,13 @@
-package com.example.finalexercise;
+package com.example.exercise3;
 
 import android.Manifest;
+import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.database.Cursor;
 import android.os.Bundle;
 import android.os.Environment;
+import android.provider.MediaStore;
 import android.util.Log;
-import android.view.View;
-import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ListView;
@@ -17,25 +18,27 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
+import androidx.recyclerview.widget.RecyclerView;
 
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Exercise2 extends AppCompatActivity {
+public class Exercise3 extends AppCompatActivity {
 
     private static final int REQUEST_STORAGE_PERMISSION = 123;
 
+    ArrayList<AudioModel> songList = new ArrayList<>();
     private TextView textView;
     private Button buttonUp, buttonSelect, buttonExit;
-    private ListView listView;
+    private RecyclerView recyclerView;
     private List<String> fileList;
     private String currentFolderPath;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_exercise2);
+        setContentView(R.layout.activity_exercise3);
 
         // Check and request permission if needed
         if (checkStoragePermission()) {
@@ -46,7 +49,7 @@ public class Exercise2 extends AppCompatActivity {
     }
 
     private void initializeApp() {
-        listView = findViewById(R.id.listView);
+        recyclerView = findViewById(R.id.recyclerView);
         textView = findViewById(R.id.textView);
         buttonUp = findViewById(R.id.buttonUp);
         buttonSelect = findViewById(R.id.buttonSelect);
@@ -55,6 +58,14 @@ public class Exercise2 extends AppCompatActivity {
         currentFolderPath = Environment.getExternalStorageDirectory().getPath();
         displayFilesAndFolders(currentFolderPath);
 
+        String[] protection = {
+                MediaStore.Audio.Media.TITLE,
+                MediaStore.Audio.Media.DATA,
+                MediaStore.Audio.Media.DURATION,
+        };
+
+        String selection = MediaStore.Audio.Media.IS_MUSIC + " != 0";
+        Cursor cursor = getContentResolver().query(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, protection, selection, null, null);
         listView.setOnItemClickListener((adapterView, view, i, l) -> {
             String selectedFileName = fileList.get(i);
             String selectedFilePath = currentFolderPath + File.separator + selectedFileName;
@@ -64,8 +75,11 @@ public class Exercise2 extends AppCompatActivity {
                 currentFolderPath = selectedFilePath;
                 displayFilesAndFolders(currentFolderPath);
             } else {
-                // Handle file click, for example, play the selected music
-                // Add your logic here
+                MyMediaPlayer.getInstance().reset();
+                MyMediaPlayer.currentIndex = i;
+                Intent intent = new Intent(this, MusicPlayer.class);
+                intent.putExtra("LIST", songList);
+                startActivity(intent);
             }
         });
 
@@ -77,13 +91,11 @@ public class Exercise2 extends AppCompatActivity {
     }
 
     private boolean checkStoragePermission() {
-        return ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE)
-                == PackageManager.PERMISSION_GRANTED;
+        return ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED;
     }
 
     private void requestStoragePermission() {
-        ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE},
-                REQUEST_STORAGE_PERMISSION);
+        ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, REQUEST_STORAGE_PERMISSION);
     }
 
     @Override
@@ -128,7 +140,14 @@ public class Exercise2 extends AppCompatActivity {
         if (parentFolder != null) {
             currentFolderPath = parentFolder.getPath();
             displayFilesAndFolders(currentFolderPath);
+
         }
+
+        // Check if the current folder is the root and disable the buttonUp accordingly
+    }
+
+    private boolean isMp3File(String fileName) {
+        return fileName.toLowerCase().endsWith(".mp3");
     }
 
     private void selectAndPlayMusic() {

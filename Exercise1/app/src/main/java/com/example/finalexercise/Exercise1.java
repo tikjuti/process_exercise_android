@@ -14,6 +14,8 @@ import android.view.View;
 import android.widget.SeekBar;
 import android.widget.Toast;
 
+import java.util.Random;
+
 class Exercise1 extends AppCompatActivity implements SeekBar.OnSeekBarChangeListener {
     private View column_one_one, column_one_two, column_two_one, column_two_two, column_two_three;
     private final int layout, menu;
@@ -71,6 +73,7 @@ class Exercise1 extends AppCompatActivity implements SeekBar.OnSeekBarChangeList
     }
     public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
         if (menu == R.id.linearLayout) {
+
             column_one_one.setBackgroundColor(Color.parseColor("#9943" + i));
             column_one_two.setBackgroundColor(Color.parseColor("#1200" + i));
             column_two_one.setBackgroundColor(Color.parseColor("#1535" + i));
