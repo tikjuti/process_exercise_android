@@ -9,10 +9,7 @@
     <option name="autoReloadType" value="NONE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="92b05f92-3fc2-40c7-a5ff-3077bd07f480" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/../Exercise4/.idea/deploymentTargetDropDown.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../Exercise4/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../Exercise4/.idea/misc.xml" afterDir="false" />
-    </list>
+    <list default="true" id="92b05f92-3fc2-40c7-a5ff-3077bd07f480" name="Changes" comment="" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -62,6 +59,13 @@
       </state>
     </system>
   </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="resourceFile" />
+      </list>
+    </option>
+  </component>
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$/.." />
   </component>
@@ -79,10 +83,7 @@
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "RunOnceActivity.cidr.known.project.marker": "true",
     "cidr.known.project.marker": "true",
-    "last_opened_file_path": "C:/Users/CNTT_SGU/HK5/MOBILE/Practice/BaiTapQuaTrinh/exercise_process/Exercise3",
-    "project.structure.last.edited": "Modules",
-    "project.structure.proportion": "0.17",
-    "project.structure.side.proportion": "0.2"
+    "last_opened_file_path": "C:/Users/CNTT_SGU/HK5/MOBILE/Practice/BaiTapQuaTrinh/Exercise3Copy"
   }
 }]]></component>
   <component name="RunManager">
