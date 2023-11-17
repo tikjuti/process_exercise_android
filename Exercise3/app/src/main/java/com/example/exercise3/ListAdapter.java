@@ -1,44 +1,33 @@
 package com.example.exercise3;
 
-import android.content.Context;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
-import android.widget.TextView;
+import android.widget.BaseAdapter;
 
-import androidx.annotation.NonNull;
-import androidx.recyclerview.widget.RecyclerView;
+import java.util.List;
 
-public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ViewHolder> {
+public class ListAdapter extends BaseAdapter {
 
-    Context context;
+    private int layout;
+    private List<AudioModel> noteList;
 
-
-
-    @NonNull
     @Override
-    public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+    public int getCount() {
+        return 0;
+    }
+
+    @Override
+    public Object getItem(int position) {
         return null;
     }
 
     @Override
-    public void onBindViewHolder(@NonNull ListAdapter.ViewHolder holder, int position) {
-
+    public long getItemId(int position) {
+        return 0;
     }
 
     @Override
-    public int getItemCount() {
-        return 0;
-    }
-    public class ViewHolder extends RecyclerView.ViewHolder{
-
-        TextView titleTextView;
-        ImageView iconImageView;
-        public ViewHolder(View itemView) {
-            super(itemView);
-            titleTextView = itemView.findViewById(R.id.music_title_text);
-            iconImageView = itemView.findViewById(R.id.icon_view);
-        }
+    public View getView(int position, View convertView, ViewGroup parent) {
+        return null;
     }
 }

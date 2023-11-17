@@ -4,10 +4,13 @@ import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
+import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
 import android.util.Log;
+import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ListView;
@@ -21,136 +24,126 @@ import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
 public class Exercise3 extends AppCompatActivity {
 
     private static final int REQUEST_STORAGE_PERMISSION = 123;
-
-    ArrayList<AudioModel> songList = new ArrayList<>();
+    private int currentSongIndex = 0;
     private TextView textView;
     private Button buttonUp, buttonSelect, buttonExit;
-    private RecyclerView recyclerView;
-    private List<String> fileList;
-    private String currentFolderPath;
+    private ListView listView;
+    private List<String> directoryEntries = new ArrayList<>();
+    private String currentDirectory;
+    private List<File> musicFiles;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_exercise3);
 
-        // Check and request permission if needed
-        if (checkStoragePermission()) {
-            initializeApp();
-        } else {
-            requestStoragePermission();
-        }
-    }
-
-    private void initializeApp() {
-        recyclerView = findViewById(R.id.recyclerView);
-        textView = findViewById(R.id.textView);
         buttonUp = findViewById(R.id.buttonUp);
         buttonSelect = findViewById(R.id.buttonSelect);
         buttonExit = findViewById(R.id.buttonExit);
-        fileList = new ArrayList<>();
-        currentFolderPath = Environment.getExternalStorageDirectory().getPath();
-        displayFilesAndFolders(currentFolderPath);
+        listView = findViewById(R.id.listView);
 
-        String[] protection = {
-                MediaStore.Audio.Media.TITLE,
-                MediaStore.Audio.Media.DATA,
-                MediaStore.Audio.Media.DURATION,
-        };
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, REQUEST_STORAGE_PERMISSION);
+        } else {
+            listDirectories(Environment.getExternalStorageDirectory().toString());
+        }
 
-        String selection = MediaStore.Audio.Media.IS_MUSIC + " != 0";
-        Cursor cursor = getContentResolver().query(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, protection, selection, null, null);
-        listView.setOnItemClickListener((adapterView, view, i, l) -> {
-            String selectedFileName = fileList.get(i);
-            String selectedFilePath = currentFolderPath + File.separator + selectedFileName;
-            File selectedFile = new File(selectedFilePath);
-            if (selectedFile.isDirectory()) {
-                // If the selected item is a directory, update the current folder path
-                currentFolderPath = selectedFilePath;
-                displayFilesAndFolders(currentFolderPath);
-            } else {
-                MyMediaPlayer.getInstance().reset();
-                MyMediaPlayer.currentIndex = i;
-                Intent intent = new Intent(this, MusicPlayer.class);
-                intent.putExtra("LIST", songList);
-                startActivity(intent);
+        buttonUp.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (!currentDirectory.equals(Environment.getExternalStorageDirectory().toString())) {
+                    File currentDirFile = new File(currentDirectory);
+                    String parentDir = currentDirFile.getParent();
+                    listDirectories(parentDir);
+                }
             }
         });
 
-        buttonUp.setOnClickListener(view -> goUp());
-
-        buttonSelect.setOnClickListener(view -> selectAndPlayMusic());
-
-        buttonExit.setOnClickListener(view -> finish());
-    }
-
-    private boolean checkStoragePermission() {
-        return ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED;
-    }
-
-    private void requestStoragePermission() {
-        ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, REQUEST_STORAGE_PERMISSION);
-    }
-
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        if (requestCode == REQUEST_STORAGE_PERMISSION) {
-            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                // Permission granted, initialize the app
-                initializeApp();
-            } else {
-                // Permission denied, handle accordingly
-                Toast.makeText(this, "Permission Denied. Exiting the app.", Toast.LENGTH_SHORT).show();
+        buttonExit.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
                 finish();
             }
-        }
-    }
+        });
+        buttonSelect.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                listMusicFile(currentDirectory);
+                if (musicFiles != null && musicFiles.size() > 0) {
+                    Intent intent = new Intent(getApplicationContext(), MusicPlayer.class);
+                    intent.putExtra("listMusic", (ArrayList) musicFiles);
+                    startActivity(intent);
+                } else {
+                    Toast.makeText(Exercise3.this, "No music files in the current directory", Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
 
-    private void displayFilesAndFolders(String folderPath) {
-        File folder = new File(folderPath);
-        File[] files = folder.listFiles();
+        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                String selectedEntry = directoryEntries.get(position);
+                String path = currentDirectory + File.separator + selectedEntry;
+                File selectedFile = new File(path);
+
+                if (selectedFile.isDirectory()) {
+                    listDirectories(path);
+                } else {
+                    Toast.makeText(Exercise3.this, "Open file: " + selectedFile.getName(), Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
+    }
+    private void listDirectories(String directoryPath) {
+        currentDirectory = directoryPath;
+        setTitle("" + currentDirectory);
+
+        directoryEntries.clear();
+        musicFiles = new ArrayList<>();
+
+        File directory = new File(directoryPath);
+        File[] files = directory.listFiles();
 
         if (files != null) {
-            fileList.clear();
             for (File file : files) {
-                Log.d(file.isDirectory() ? "FileList" : "FileListFile", (file.isDirectory() ? "Directory: " : "File: ") + file.getName());
-                fileList.add(file.getName());
+                directoryEntries.add(file.getName());
             }
         }
 
-        // Update the TextView with the current directory path
-        textView.setText(folderPath);
-
-        // Use ArrayAdapter to bind the data to the ListView
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, fileList);
-        listView.setAdapter(adapter);
+        ArrayAdapter<String> directoryList = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, directoryEntries);
+        listView.setAdapter(directoryList);
     }
 
-    private void goUp() {
-        File currentFolder = new File(currentFolderPath);
-        File parentFolder = currentFolder.getParentFile();
+    private void listMusicFile(String directoryPath) {
+        currentDirectory = directoryPath;
+        directoryEntries.clear();
+        musicFiles = new ArrayList<>();
 
-        if (parentFolder != null) {
-            currentFolderPath = parentFolder.getPath();
-            displayFilesAndFolders(currentFolderPath);
+        File directory = new File(directoryPath);
+        File[] files = directory.listFiles();
 
+        if (files != null) {
+            for (File file : files) {
+                if (isMusicFile(file.getName())) {
+                    musicFiles.add(file);
+                }
+            }
         }
-
-        // Check if the current folder is the root and disable the buttonUp accordingly
     }
-
-    private boolean isMp3File(String fileName) {
-        return fileName.toLowerCase().endsWith(".mp3");
-    }
-
-    private void selectAndPlayMusic() {
-        // TODO: Implement logic to play selected music
+    private boolean isMusicFile(String fileName) {
+        String[] supportedExtensions = {".mp3", ".wav", ".ogg", ".mp4"};
+        for (String extension : supportedExtensions) {
+            if (fileName.toLowerCase().endsWith(extension)) {
+                return true;
+            }
+        }
+        return false;
     }
 }
