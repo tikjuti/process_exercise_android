@@ -55,6 +55,7 @@ public class Exercise3 extends AppCompatActivity {
         buttonSelect = findViewById(R.id.buttonSelect);
         buttonExit = findViewById(R.id.buttonExit);
         fileList = new ArrayList<>();
+
         currentFolderPath = Environment.getExternalStorageDirectory().getPath();
         displayFilesAndFolders(currentFolderPath);
 
