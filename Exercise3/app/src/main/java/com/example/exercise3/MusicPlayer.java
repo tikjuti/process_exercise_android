@@ -1,7 +1,9 @@
 package com.example.exercise3;
 
-import android.content.Context;
+import android.annotation.SuppressLint;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.media.MediaMetadataRetriever;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Bundle;
@@ -20,15 +22,16 @@ import androidx.appcompat.app.AppCompatActivity;
 import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.concurrent.TimeUnit;
+
+import de.hdodenhof.circleimageview.CircleImageView;
 
 public class MusicPlayer extends AppCompatActivity {
 
     TextView title, times,timesTotal;
     SeekBar seekBar;
-    ImageView next, pausePlay, previous, music_img;
+    ImageView next, pausePlay, previous;
+    CircleImageView music_img;
     ArrayList<File> songList;
-    AudioModel currentSong;
     MediaPlayer mediaPlayer;
     int position = 0;
     Animation animation;
@@ -123,10 +126,16 @@ public class MusicPlayer extends AppCompatActivity {
             }
         });
     }
+    @SuppressLint("SuspiciousIndentation")
     private void initPlayer() {
         mediaPlayer = MediaPlayer.create(MusicPlayer.this, Uri.parse(songList.get(position).getAbsolutePath()));
         mediaPlayer.start();
         title.setText(songList.get(position).getName());
+        MediaMetadataRetriever retriever = new MediaMetadataRetriever();
+        retriever.setDataSource(songList.get(position).getAbsolutePath());
+        Bitmap bitmap = retriever.getFrameAtTime(10000000);
+        if (bitmap != null)
+        music_img.setImageBitmap(bitmap);
         music_img.startAnimation(animation);
     }
     private void setTimesTotal() {

@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
     <TextView
@@ -13,13 +14,13 @@
         android:padding="18dp"
         android:text="TITLE OF THE SONG"
         android:textSize="20dp"
-        android:textStyle="bold" />
-    <ImageView
+        android:textStyle="bold"
+        tools:ignore="MissingClass" />
+    <de.hdodenhof.circleimageview.CircleImageView
         android:id="@+id/music_img"
         android:layout_width="400dp"
         android:layout_height="400dp"
         android:layout_above="@id/controls"
-        android:padding="20dp"
         android:src="@drawable/placeholder" />
     <RelativeLayout
         android:id="@+id/controls"

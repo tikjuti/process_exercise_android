@@ -1,14 +1,13 @@
 package com.example.exercise3;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.database.Cursor;
-import android.media.MediaPlayer;
+import android.graphics.Bitmap;
+import android.media.MediaMetadataRetriever;
 import android.os.Bundle;
 import android.os.Environment;
-import android.provider.MediaStore;
-import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -17,11 +16,9 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
-import androidx.recyclerview.widget.RecyclerView;
 
 import java.io.File;
 import java.io.IOException;
@@ -31,11 +28,9 @@ import java.util.List;
 public class Exercise3 extends AppCompatActivity {
 
     private static final int REQUEST_STORAGE_PERMISSION = 123;
-    private int currentSongIndex = 0;
-    private TextView textView;
     private Button buttonUp, buttonSelect, buttonExit;
     private ListView listView;
-    private List<String> directoryEntries = new ArrayList<>();
+    private List<FileSystemModel> directoryEntries = new ArrayList<>();
     private String currentDirectory;
     private List<File> musicFiles;
 
@@ -52,7 +47,11 @@ public class Exercise3 extends AppCompatActivity {
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, REQUEST_STORAGE_PERMISSION);
         } else {
-            listDirectories(Environment.getExternalStorageDirectory().toString());
+            try {
+                listDirectories(Environment.getExternalStorageDirectory().toString());
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
         }
 
         buttonUp.setOnClickListener(new View.OnClickListener() {
@@ -61,7 +60,11 @@ public class Exercise3 extends AppCompatActivity {
                 if (!currentDirectory.equals(Environment.getExternalStorageDirectory().toString())) {
                     File currentDirFile = new File(currentDirectory);
                     String parentDir = currentDirFile.getParent();
-                    listDirectories(parentDir);
+                    try {
+                        listDirectories(parentDir);
+                    } catch (IOException e) {
+                        throw new RuntimeException(e);
+                    }
                 }
             }
         });
@@ -89,19 +92,24 @@ public class Exercise3 extends AppCompatActivity {
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                String selectedEntry = directoryEntries.get(position);
-                String path = currentDirectory + File.separator + selectedEntry;
+                FileSystemModel selectedEntry = directoryEntries.get(position);
+                String path = selectedEntry.getPath();
                 File selectedFile = new File(path);
-
                 if (selectedFile.isDirectory()) {
-                    listDirectories(path);
+                    try {
+                        listDirectories(path);
+                    } catch (IOException e) {
+                        throw new RuntimeException(e);
+                    }
                 } else {
                     Toast.makeText(Exercise3.this, "Open file: " + selectedFile.getName(), Toast.LENGTH_SHORT).show();
                 }
             }
         });
     }
-    private void listDirectories(String directoryPath) {
+
+    @SuppressLint("SuspiciousIndentation")
+    private void listDirectories(String directoryPath) throws IOException {
         currentDirectory = directoryPath;
         setTitle("" + currentDirectory);
 
@@ -113,12 +121,28 @@ public class Exercise3 extends AppCompatActivity {
 
         if (files != null) {
             for (File file : files) {
-                directoryEntries.add(file.getName());
+                FileSystemModel item = new FileSystemModel();
+                item.setTitle(file.getName());
+                item.setPath(file.getAbsolutePath());
+                item.setFolder(file.isDirectory());
+
+                try {
+                    MediaMetadataRetriever retriever = new MediaMetadataRetriever();
+                    retriever.setDataSource(file.getAbsolutePath());
+                    Bitmap bitmap = retriever.getFrameAtTime(10000000);
+                    if (bitmap != null)
+                    item.setAlbumName(bitmap);
+
+                    retriever.release();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+
+                directoryEntries.add(item);
             }
         }
-
-        ArrayAdapter<String> directoryList = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, directoryEntries);
-        listView.setAdapter(directoryList);
+        ListAdapter customAdapter = new ListAdapter(this, directoryEntries);
+        listView.setAdapter(customAdapter);
     }
 
     private void listMusicFile(String directoryPath) {
@@ -137,6 +161,7 @@ public class Exercise3 extends AppCompatActivity {
             }
         }
     }
+
     private boolean isMusicFile(String fileName) {
         String[] supportedExtensions = {".mp3", ".wav", ".ogg", ".mp4"};
         for (String extension : supportedExtensions) {
