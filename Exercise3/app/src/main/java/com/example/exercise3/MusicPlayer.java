@@ -32,6 +32,7 @@ public class MusicPlayer extends AppCompatActivity {
     ImageView next, pausePlay, previous;
     CircleImageView music_img;
     ArrayList<File> songList;
+
     MediaPlayer mediaPlayer;
     int position = 0;
     Animation animation;
