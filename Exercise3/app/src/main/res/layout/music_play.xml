@@ -12,8 +12,8 @@
         android:gravity="center"
         android:textSize="20dp"
         android:textStyle="bold"
-        tools:ignore="MissingClass" />
-
+        tools:ignore="MissingClass"
+        android:textColor="#F3EEEA" />
     <de.hdodenhof.circleimageview.CircleImageView
         android:id="@+id/music_img"
         android:layout_width="320dp"
