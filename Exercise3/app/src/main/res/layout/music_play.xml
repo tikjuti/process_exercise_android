@@ -3,6 +3,14 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
+    <ImageView
+        android:id="@+id/back"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/baseline_keyboard_backspace_24"
+        android:paddingHorizontal="30dp"
+        android:paddingVertical="10dp"
+        />
     <TextView
         android:id="@+id/title"
         android:layout_width="422dp"
@@ -12,6 +20,7 @@
         android:gravity="center"
         android:textSize="20dp"
         android:textStyle="bold"
+        android:layout_marginTop="40dp"
         tools:ignore="MissingClass"
         android:textColor="#F3EEEA" />
     <de.hdodenhof.circleimageview.CircleImageView
@@ -42,26 +51,29 @@
             android:textAlignment="textEnd"
             android:textSize="20sp" />
 
-        <RelativeLayout
+        <LinearLayout
             android:id="@+id/menu_icon"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:weightSum="5"
             android:gravity="center">
 
             <ImageView
                 android:id="@+id/repeat"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_alignLeft="@+id/previous"
+                android:layout_toLeftOf="@id/previous"
+                android:layout_weight="1"
                 android:src="@drawable/baseline_repeat_24"
                 />
             <ImageView
                 android:id="@+id/previous"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_alignLeft="@id/pausePlay"
-                android:layout_alignParentStart="true"
-                android:layout_toStartOf="@id/next"
+                android:layout_toLeftOf="@id/pausePlay"
+                android:layout_weight="1"
+
                 android:src="@drawable/baseline_keyboard_double_arrow_left_24" />
 
             <ImageView
@@ -69,32 +81,36 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_centerInParent="true"
-                android:src="@drawable/baseline_pause_24" />
+                android:layout_weight="1"
 
+                android:src="@drawable/baseline_pause_24" />
             <ImageView
                 android:id="@+id/next"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_alignParentEnd="true"
-                android:layout_toEndOf="@id/pausePlay"
+                android:layout_toRightOf="@id/pausePlay"
+                android:layout_weight="1"
+
                 android:src="@drawable/baseline_keyboard_double_arrow_right_24" />
             <ImageView
                 android:id="@+id/playlist"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_alignRight="@+id/next"
+                android:layout_toRightOf="@id/next"
+                android:layout_weight="1"
+
                 android:src="@drawable/baseline_playlist_play_24"
                 />
-        </RelativeLayout>
+        </LinearLayout>
 
         <SeekBar
             android:id="@+id/seek_bar"
-            android:layout_width="match_parent"
+            android:layout_width="370dp"
             android:layout_height="20dp"
             android:layout_below="@id/menu_icon"
             android:layout_alignParentBottom="true"
-            android:layout_marginTop="-10dp"
-            android:paddingVertical="5dp" />
+            android:layout_marginHorizontal="10dp"
+            android:layout_marginTop="-10dp" />
 
         <TextView
             android:id="@+id/times"
@@ -103,6 +119,7 @@
             android:layout_alignParentStart="true"
             android:layout_alignParentBottom="true"
             android:layout_marginStart="15dp"
+            android:paddingLeft="10dp"
             android:text="0:00" />
 
         <TextView
@@ -112,6 +129,7 @@
             android:layout_alignParentEnd="true"
             android:layout_alignParentBottom="true"
             android:layout_marginEnd="15dp"
+            android:paddingRight="10dp"
             android:text="0:00" />
 
     </RelativeLayout>
