@@ -48,8 +48,8 @@ public class MainActivity extends AppCompatActivity {
     private void scheduleDailyNotification() {
         Calendar calendar = Calendar.getInstance();
         calendar.setTimeInMillis(System.currentTimeMillis());
-        calendar.set(Calendar.HOUR_OF_DAY, 21); // 8 PM
-        calendar.set(Calendar.MINUTE, 38);
+        calendar.set(Calendar.HOUR_OF_DAY, 9); // 8 PM
+        calendar.set(Calendar.MINUTE, 32);
         calendar.set(Calendar.SECOND, 0);
 
         // If the current time is already past 8:55 PM, set it for the next day
@@ -128,23 +128,33 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void saveImageToGallery(Bitmap imageBitmap) {
-        //lấy đường dẫn để lưu ảnh
+        // Lấy đường dẫn để lưu ảnh vào thư mục Pictures trên bộ nhớ ngoại vi
         File storageDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES);
+        // Tạo định dạng thời gian để đặt tên file theo định dạng "yyyyMMdd_HHmmss"
         String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(new Date());
-        //Đặt tên file
+        // Đặt tên file kết hợp với timeStamp để có tên file duy nhất
         String fileName = "IMG_" + timeStamp + ".jpg";
+        // Tạo đối tượng File với đường dẫn và tên file đã xác định
         File imageFile = new File(storageDir, fileName);
+
         try {
+            // Mở một OutputStream để ghi dữ liệu vào file
             FileOutputStream outputStream = new FileOutputStream(imageFile);
+            // Nén và ghi dữ liệu từ Bitmap vào file dưới định dạng JPEG với chất lượng 100
             imageBitmap.compress(Bitmap.CompressFormat.JPEG, 100, outputStream);
+            // Đảm bảo rằng tất cả dữ liệu đã được ghi và đóng OutputStream
             outputStream.flush();
             outputStream.close();
+            // Tạo Intent để cập nhật thư viện ảnh với file mới thêm vào
             Intent mediaScanIntent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
             mediaScanIntent.setData(Uri.fromFile(imageFile));
+            // Gửi Intent để hệ thống biết về file mới
             sendBroadcast(mediaScanIntent);
+            // Hiển thị thông báo ngắn cho người dùng về việc lưu ảnh thành công
             Toast.makeText(this, "Image saved successfully", Toast.LENGTH_SHORT).show();
         } catch (Exception e) {
-
+            // Xử lý các ngoại lệ, không có hành động cụ thể ở đây
         }
     }
+
 }
