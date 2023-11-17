@@ -12,12 +12,15 @@
     <list default="true" id="92b05f92-3fc2-40c7-a5ff-3077bd07f480" name="Changes" comment="">
       <change afterPath="$PROJECT_DIR$/app/src/main/java/com/example/exercise3/FileSystemModel.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+<<<<<<< HEAD
       <change beforePath="$PROJECT_DIR$/app/build.gradle.kts" beforeDir="false" afterPath="$PROJECT_DIR$/app/build.gradle.kts" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/src/main/java/com/example/exercise3/AudioModel.java" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/app/src/main/java/com/example/exercise3/Exercise3.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/example/exercise3/Exercise3.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/src/main/java/com/example/exercise3/ListAdapter.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/example/exercise3/ListAdapter.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/src/main/java/com/example/exercise3/MusicPlayer.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/example/exercise3/MusicPlayer.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/src/main/java/com/example/exercise3/MyMediaPlayer.java" beforeDir="false" />
+=======
+>>>>>>> 2c19a5f1bd134cd9a5baf77c6b68dfb18e133361
       <change beforePath="$PROJECT_DIR$/app/src/main/res/layout/music_play.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/layout/music_play.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/src/main/res/layout/recycler_item.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/layout/recycler_item.xml" afterDir="false" />
     </list>
@@ -26,7 +29,11 @@
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
+<<<<<<< HEAD
   <component name="ExecutionTargetManager" SELECTED_TARGET="device_and_snapshot_combo_box_target[emulator-5554]" />
+=======
+  <component name="ExecutionTargetManager" SELECTED_TARGET="device_and_snapshot_combo_box_target[]" />
+>>>>>>> 2c19a5f1bd134cd9a5baf77c6b68dfb18e133361
   <component name="ExternalProjectsData">
     <projectState path="$PROJECT_DIR$">
       <ProjectState />
@@ -89,6 +96,7 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
+<<<<<<< HEAD
   <component name="PropertiesComponent"><![CDATA[{
   "keyToString": {
     "RunOnceActivity.OpenProjectViewOnStart": "true",
@@ -96,8 +104,17 @@
     "RunOnceActivity.cidr.known.project.marker": "true",
     "cidr.known.project.marker": "true",
     "last_opened_file_path": "C:/Users/CNTT_SGU/HK5/MOBILE/Practice/BaiTapQuaTrinh/exercise_process/Exercise3"
+=======
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.cidr.known.project.marker&quot;: &quot;true&quot;,
+    &quot;cidr.known.project.marker&quot;: &quot;true&quot;,
+    &quot;last_opened_file_path&quot;: &quot;C:/Users/ASUS/Documents/School/HK1 Nam 3/Mobile/process_exercise_android/Exercise3&quot;
+>>>>>>> 2c19a5f1bd134cd9a5baf77c6b68dfb18e133361
   }
-}]]></component>
+}</component>
   <component name="RecentsManager">
     <key name="MoveFile.RECENT_KEYS">
       <recent name="C:\Users\ASUS\Documents\School\HK1 Nam 3\Mobile\process_exercise_android\Exercise3\app\src\main\res\drawable" />
