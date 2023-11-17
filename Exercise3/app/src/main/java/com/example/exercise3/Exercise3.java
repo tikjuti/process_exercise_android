@@ -102,7 +102,19 @@ public class Exercise3 extends AppCompatActivity {
                         throw new RuntimeException(e);
                     }
                 } else {
-                    Toast.makeText(Exercise3.this, "Open file: " + selectedFile.getName(), Toast.LENGTH_SHORT).show();
+                    musicFiles = new ArrayList<>();
+                    musicFiles.add(selectedFile);
+                    if (musicFiles != null && musicFiles.size() > 0 && isMusicFile(selectedFile.getName())) {
+                        Intent intent = new Intent(getApplicationContext(), MusicPlayer.class);
+                        intent.putExtra("listMusic", (ArrayList) musicFiles);
+                        startActivity(intent);
+                    } else {
+                        Toast.makeText(Exercise3.this, "This is not file music", Toast.LENGTH_SHORT).show();
+                    }
+//                    MediaMetadataRetriever retriever = new MediaMetadataRetriever();
+//                    retriever.setDataSource(selectedFile.getAbsolutePath());
+//                    String albumName = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ARTIST);
+//                    Toast.makeText(Exercise3.this, albumName, Toast.LENGTH_LONG).show();
                 }
             }
         });
@@ -131,8 +143,10 @@ public class Exercise3 extends AppCompatActivity {
                     retriever.setDataSource(file.getAbsolutePath());
                     Bitmap bitmap = retriever.getFrameAtTime(10000000);
                     if (bitmap != null)
-                    item.setAlbumName(bitmap);
-
+                    item.setAlbumImage(bitmap);
+                    String albumName = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ALBUM);
+                    if (albumName != null)
+                        item.setAlbumName(albumName);
                     retriever.release();
                 } catch (Exception e) {
                     e.printStackTrace();

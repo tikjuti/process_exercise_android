@@ -22,7 +22,7 @@ public class ListAdapter extends ArrayAdapter<FileSystemModel> {
     private static class ViewHolder {
         ImageView fileImageView;
         TextView fileNameTextView;
-        TextView albumTextView;
+        TextView albumName;
     }
     public ListAdapter(@NonNull Context context, List<FileSystemModel> itemList) {
         super(context, R.layout.recycler_item, itemList);
@@ -41,7 +41,7 @@ public class ListAdapter extends ArrayAdapter<FileSystemModel> {
             holder = new ViewHolder();
             holder.fileImageView = view.findViewById(R.id.icon_view);
             holder.fileNameTextView = view.findViewById(R.id.music_title_text);
-//            holder.albumTextView = view.findViewById(R.id.albumTextView);
+            holder.albumName = view.findViewById(R.id.albumName);
             view.setTag(holder);
         } else {
             holder = (ViewHolder) view.getTag();
@@ -53,17 +53,17 @@ public class ListAdapter extends ArrayAdapter<FileSystemModel> {
         if (item.isFolder()) {
             holder.fileImageView.setImageResource(R.drawable.baseline_folder_24);
         } else {
-//            if (item.getAlbumName() != null && !item.getAlbumName().isEmpty()) {
-//                holder.albumTextView.setText(item.getAlbumName());
-//            } else {
-//                holder.albumTextView.setVisibility(View.GONE);
-//                holder.fileImageView.setImageResource(R.drawable.music_icon);
-//            }
             if (isMusicFile(item.getTitle())) {
-                if(item.getAlbumName()== null)
+                if (item.getAlbumName() != null && !item.getAlbumName().isEmpty()) {
+                    holder.albumName.setText(item.getAlbumName());
+                    holder.albumName.setVisibility(View.VISIBLE);
+                } else {
+                    holder.albumName.setVisibility(View.GONE);
+                }
+                if(item.getAlbumImage()== null)
                     holder.fileImageView.setImageResource(R.drawable.music_icon);
                 else
-                    holder.fileImageView.setImageBitmap(item.getAlbumName());
+                    holder.fileImageView.setImageBitmap(item.getAlbumImage());
             } else
                 holder.fileImageView.setImageResource(R.drawable.baseline_folder_24);
         }

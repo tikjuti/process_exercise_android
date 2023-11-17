@@ -14,7 +14,6 @@ import android.view.animation.AnimationUtils;
 import android.widget.ImageView;
 import android.widget.SeekBar;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
@@ -29,13 +28,14 @@ public class MusicPlayer extends AppCompatActivity {
 
     TextView title, times,timesTotal;
     SeekBar seekBar;
-    ImageView next, pausePlay, previous;
+    ImageView next, pausePlay, previous, back, repeat;
     CircleImageView music_img;
     ArrayList<File> songList;
 
     MediaPlayer mediaPlayer;
     int position = 0;
     Animation animation;
+    private boolean isRepeat = false;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -50,6 +50,8 @@ public class MusicPlayer extends AppCompatActivity {
         pausePlay = findViewById(R.id.pausePlay);
         music_img = findViewById(R.id.music_img);
         timesTotal = findViewById(R.id.timesTotal);
+        back = findViewById(R.id.back);
+        repeat = findViewById(R.id.repeat);
         animation = AnimationUtils.loadAnimation(this, R.anim.disc_rotate);
 
         Intent intent = getIntent();
@@ -60,6 +62,25 @@ public class MusicPlayer extends AppCompatActivity {
         initPlayer();
         setTimesTotal();
         updateTimeSong();
+        repeat.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                isRepeat = !isRepeat;
+                mediaPlayer.setLooping(isRepeat);
+                repeat.setImageResource(isRepeat ? R.drawable.baseline_repeat_active_24 : R.drawable.baseline_repeat_24);
+                pausePlay.setImageResource(R.drawable.baseline_pause_24);
+                setTimesTotal();
+                updateTimeSong();
+            }
+        });
+        back.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mediaPlayer.stop();
+                Intent intentBack = new Intent(getApplicationContext(), Exercise3.class);
+                startActivity(intentBack);
+            }
+        });
         next.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -131,7 +152,7 @@ public class MusicPlayer extends AppCompatActivity {
     private void initPlayer() {
         mediaPlayer = MediaPlayer.create(MusicPlayer.this, Uri.parse(songList.get(position).getAbsolutePath()));
         mediaPlayer.start();
-        title.setText(songList.get(position).getName());
+        title.setText(customTitle(songList.get(position).getName()));
         MediaMetadataRetriever retriever = new MediaMetadataRetriever();
         retriever.setDataSource(songList.get(position).getAbsolutePath());
         Bitmap bitmap = retriever.getFrameAtTime(10000000);
@@ -174,4 +195,14 @@ public class MusicPlayer extends AppCompatActivity {
         }, 100);
     }
 
+    private String customTitle(String fileName) {
+        String[] supportedExtensions = {".mp3", ".wav", ".ogg", ".mp4"};
+        for (String extension : supportedExtensions) {
+            if (fileName.toLowerCase().endsWith(extension)) {
+                fileName = fileName.substring(0, fileName.length() - 4);
+                return fileName;
+            }
+        }
+        return null;
+    }
 }

@@ -1,32 +1,45 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="#000000"
-    android:layout_marginTop="5dp"
     android:layout_marginLeft="5dp"
+    android:layout_marginTop="5dp"
     android:layout_marginRight="5dp"
-    android:paddingTop="10dp"
-    android:paddingBottom="10dp"
-    xmlns:tools="http://schemas.android.com/tools">
+    android:background="#000000"
+    android:paddingBottom="5dp">
 
 
     <ImageView
+        android:id="@+id/icon_view"
         android:layout_width="36dp"
         android:layout_height="36dp"
-        android:id="@+id/icon_view"
         android:layout_centerVertical="true"
-        android:src="@drawable/music_icon"/>
+        android:src="@drawable/music_icon" />
 
     <TextView
+        android:id="@+id/music_title_text"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_centerVertical="true"
-        android:id="@+id/music_title_text"
         android:layout_toEndOf="@id/icon_view"
-        android:padding="10dp"
         android:ellipsize="end"
-        tools:text="Music"
-        android:textColor="#FFFFFF"/>
+        android:padding="10dp"
+        android:textColor="#FFFFFF"
+        tools:text="Music" />
+
+    <TextView
+        android:id="@+id/albumName"
+        android:layout_width="wrap_content"
+        android:layout_height="30dp"
+        android:layout_below="@+id/music_title_text"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentEnd="true"
+        android:layout_marginStart="35dp"
+        android:layout_marginTop="7dp"
+        android:layout_marginEnd="2dp"
+        android:paddingLeft="10dp"
+        android:text="Album Name"
+        android:visibility="gone" />
 
 </RelativeLayout>
