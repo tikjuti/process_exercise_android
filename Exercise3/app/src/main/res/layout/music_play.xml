@@ -11,15 +11,10 @@
         android:text="TITLE OF THE SONG"
         android:gravity="center"
         android:textSize="20dp"
-<<<<<<< HEAD
         android:textStyle="bold"
-        tools:ignore="MissingClass" />
+        tools:ignore="MissingClass"
+        android:textColor="#F3EEEA" />
     <de.hdodenhof.circleimageview.CircleImageView
-=======
-        android:textColor="#F3EEEA"
-        android:textStyle="bold" />
-    <ImageView
->>>>>>> 2c19a5f1bd134cd9a5baf77c6b68dfb18e133361
         android:id="@+id/music_img"
         android:layout_width="400dp"
         android:layout_height="350dp"
