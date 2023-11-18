@@ -140,12 +140,18 @@ public class Exercise3 extends AppCompatActivity {
                     MediaMetadataRetriever retriever = new MediaMetadataRetriever();
                     retriever.setDataSource(file.getAbsolutePath());
                     Bitmap bitmap = retriever.getFrameAtTime(10000000);
-                    if (bitmap != null)
-                    item.setAlbumImage(bitmap);
-                    else {
-                        int drawableId = R.drawable.placeholder;
-                        Bitmap bitmapR = BitmapFactory.decodeResource(this.getResources(), drawableId);
-                        item.setAlbumImage(bitmapR);
+                    byte[] picture = retriever.getEmbeddedPicture();
+                    if (picture != null) {
+                        Bitmap bitmapPicture = BitmapFactory.decodeByteArray(picture, 0, picture.length);
+                        item.setAlbumImage(bitmapPicture);
+                    } else {
+                        if (bitmap != null)
+                            item.setAlbumImage(bitmap);
+                        else {
+                            int drawableId = R.drawable.placeholder;
+                            Bitmap bitmapR = BitmapFactory.decodeResource(this.getResources(), drawableId);
+                            item.setAlbumImage(bitmapR);
+                        }
                     }
                     String albumName = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ALBUM);
                     if (albumName != null)

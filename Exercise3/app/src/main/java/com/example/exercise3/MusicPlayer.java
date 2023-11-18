@@ -3,6 +3,7 @@ package com.example.exercise3;
 import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.media.MediaMetadataRetriever;
 import android.media.MediaPlayer;
 import android.net.Uri;
@@ -180,10 +181,15 @@ public class MusicPlayer extends AppCompatActivity {
         MediaMetadataRetriever retriever = new MediaMetadataRetriever();
         retriever.setDataSource(songList.get(position).getAbsolutePath());
         Bitmap bitmap = retriever.getFrameAtTime(6000000);
-        if (bitmap != null)
-            music_img.setImageBitmap(bitmap);
-        else
-            music_img.setImageResource(R.drawable.placeholder);
+        byte[] picture = retriever.getEmbeddedPicture();
+        if (picture != null) {
+            Bitmap bitmapPicture = BitmapFactory.decodeByteArray(picture, 0, picture.length);
+            music_img.setImageBitmap(bitmapPicture);
+        } else
+            if (bitmap != null)
+                music_img.setImageBitmap(bitmap);
+            else
+                music_img.setImageResource(R.drawable.placeholder);
         music_img.startAnimation(animation);
     }
     private void setTimesTotal() {
@@ -263,10 +269,15 @@ public class MusicPlayer extends AppCompatActivity {
             MediaMetadataRetriever retriever = new MediaMetadataRetriever();
             retriever.setDataSource(songList.get(position).getAbsolutePath());
             Bitmap bitmap = retriever.getFrameAtTime(6000000);
-            if (bitmap != null)
-                music_img.setImageBitmap(bitmap);
-            else
-                music_img.setImageResource(R.drawable.placeholder);
+            byte[] picture = retriever.getEmbeddedPicture();
+            if (picture != null) {
+                Bitmap bitmapPicture = BitmapFactory.decodeByteArray(picture, 0, picture.length);
+                music_img.setImageBitmap(bitmapPicture);
+            } else
+                if (bitmap != null)
+                    music_img.setImageBitmap(bitmap);
+                else
+                    music_img.setImageResource(R.drawable.placeholder);
             pausePlay.setImageResource(R.drawable.baseline_pause_24);
             setTimesTotal();
             updateTimeSong();
