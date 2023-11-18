@@ -186,7 +186,7 @@ public class Exercise3 extends AppCompatActivity {
     }
 
     private boolean isMusicFile(String fileName) {
-        String[] supportedExtensions = {".mp3", ".wav", ".ogg", ".mp4"};
+        String[] supportedExtensions = {".mp3", ".wav", ".ogg", ".mp4", ".aac", ".ogg", ".m4a", ".wma", ".aiff"};
         for (String extension : supportedExtensions) {
             if (fileName.toLowerCase().endsWith(extension)) {
                 return true;

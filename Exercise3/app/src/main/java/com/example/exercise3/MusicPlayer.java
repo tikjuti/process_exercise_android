@@ -12,12 +12,9 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.view.View;
-import android.view.animation.Animation;
-import android.view.animation.AnimationUtils;
 import android.widget.ImageView;
 import android.widget.SeekBar;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
@@ -30,21 +27,17 @@ import java.util.Random;
 import de.hdodenhof.circleimageview.CircleImageView;
 
 public class MusicPlayer extends AppCompatActivity {
-
     TextView title, times, timesTotal;
     SeekBar seekBar;
     ImageView next, pausePlay, previous, back, repeat, randomPlay;
     CircleImageView music_img;
     ArrayList<File> songList;
-
     MediaPlayer mediaPlayer;
     int position = 0;
-    Animation animation;
     private ObjectAnimator anim;
     private boolean isRepeat = false;
     private boolean isRandom = false;
     Random random;
-    private int currentSong;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -62,7 +55,10 @@ public class MusicPlayer extends AppCompatActivity {
         back = findViewById(R.id.back);
         repeat = findViewById(R.id.repeat);
         randomPlay = findViewById(R.id.randomPlay);
-        animation = AnimationUtils.loadAnimation(this, R.anim.disc_rotate);
+        anim = ObjectAnimator.ofFloat(music_img, "rotation", 0, 360);
+        anim.setInterpolator(null);
+        anim.setDuration(10000);
+        anim.setRepeatCount(ValueAnimator.INFINITE);
 
         Intent intent = getIntent();
         if (intent.hasExtra("listMusic")) {
@@ -150,12 +146,10 @@ public class MusicPlayer extends AppCompatActivity {
                 if (mediaPlayer.isPlaying()) {
                     mediaPlayer.pause();
                     anim.pause();
-                    music_img.clearAnimation();
                     pausePlay.setImageResource(R.drawable.baseline_play_arrow_24);
                 } else {
                     mediaPlayer.start();
                     anim.resume();
-//                    music_img.startAnimation(animation);
                     pausePlay.setImageResource(R.drawable.baseline_pause_24);
                 }
             }
@@ -195,12 +189,7 @@ public class MusicPlayer extends AppCompatActivity {
             music_img.setImageBitmap(bitmap);
         else
             music_img.setImageResource(R.drawable.placeholder);
-        anim = ObjectAnimator.ofFloat(music_img, "rotation", 0, 360);
-        anim.setInterpolator(null);
-        anim.setDuration(10000);
-        anim.setRepeatCount(ValueAnimator.INFINITE);
         anim.start();
-//        music_img.startAnimation(animation);
     }
 
     private void setTimesTotal() {
@@ -241,21 +230,8 @@ public class MusicPlayer extends AppCompatActivity {
         }, 100);
     }
 
-    private void updateTimeSongRandom() {
-        final Handler handler = new Handler();
-        handler.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                SimpleDateFormat format = new SimpleDateFormat("mm:ss");
-                times.setText(format.format(mediaPlayer.getCurrentPosition()));
-                seekBar.setProgress(mediaPlayer.getCurrentPosition());
-                handler.postDelayed(this, 500);
-            }
-        }, 100);
-    }
-
     private String customTitle(String fileName) {
-        String[] supportedExtensions = {".mp3", ".wav", ".ogg", ".mp4"};
+        String[] supportedExtensions = {".mp3", ".wav", ".ogg", ".mp4", ".aac", ".ogg", ".m4a", ".wma", ".aiff"};
         for (String extension : supportedExtensions) {
             if (fileName.toLowerCase().endsWith(extension)) {
                 fileName = fileName.substring(0, fileName.length() - 4);
