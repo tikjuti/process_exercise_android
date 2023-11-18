@@ -1,5 +1,7 @@
 package com.example.exercise3;
 
+import android.animation.ObjectAnimator;
+import android.animation.ValueAnimator;
 import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -29,7 +31,7 @@ import de.hdodenhof.circleimageview.CircleImageView;
 
 public class MusicPlayer extends AppCompatActivity {
 
-    TextView title, times,timesTotal;
+    TextView title, times, timesTotal;
     SeekBar seekBar;
     ImageView next, pausePlay, previous, back, repeat, randomPlay;
     CircleImageView music_img;
@@ -38,6 +40,7 @@ public class MusicPlayer extends AppCompatActivity {
     MediaPlayer mediaPlayer;
     int position = 0;
     Animation animation;
+    private ObjectAnimator anim;
     private boolean isRepeat = false;
     private boolean isRandom = false;
     Random random;
@@ -84,17 +87,17 @@ public class MusicPlayer extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 isRandom = !isRandom;
-                    if (mediaPlayer.isPlaying()) {
-                        mediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
-                            @Override
-                            public void onCompletion(MediaPlayer mp) {
-                                randomNextSong();
-                            }
-                        });
-                    } else {
-                        randomNextSong();
-                    }
-                    randomPlay.setImageResource(isRandom ? R.drawable.baseline_shuffle_active_24 : R.drawable.baseline_shuffle_24);
+                if (mediaPlayer.isPlaying()) {
+                    mediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+                        @Override
+                        public void onCompletion(MediaPlayer mp) {
+                            randomNextSong();
+                        }
+                    });
+                } else {
+                    randomNextSong();
+                }
+                randomPlay.setImageResource(isRandom ? R.drawable.baseline_shuffle_active_24 : R.drawable.baseline_shuffle_24);
             }
         });
 
@@ -110,7 +113,7 @@ public class MusicPlayer extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 position++;
-                if (position > songList.size()-1){
+                if (position > songList.size() - 1) {
                     position = 0;
                 }
                 if (mediaPlayer.isPlaying()) {
@@ -127,8 +130,8 @@ public class MusicPlayer extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 position--;
-                if (position < 0){
-                    position = songList.size()-1;
+                if (position < 0) {
+                    position = songList.size() - 1;
                 }
                 if (mediaPlayer.isPlaying()) {
                     mediaPlayer.stop();
@@ -144,13 +147,15 @@ public class MusicPlayer extends AppCompatActivity {
         pausePlay.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(mediaPlayer.isPlaying()) {
+                if (mediaPlayer.isPlaying()) {
                     mediaPlayer.pause();
+                    anim.pause();
                     music_img.clearAnimation();
                     pausePlay.setImageResource(R.drawable.baseline_play_arrow_24);
                 } else {
                     mediaPlayer.start();
-                    music_img.startAnimation(animation);
+                    anim.resume();
+//                    music_img.startAnimation(animation);
                     pausePlay.setImageResource(R.drawable.baseline_pause_24);
                 }
             }
@@ -173,6 +178,7 @@ public class MusicPlayer extends AppCompatActivity {
             }
         });
     }
+
     @SuppressLint("SuspiciousIndentation")
     private void initPlayer() {
         mediaPlayer = MediaPlayer.create(MusicPlayer.this, Uri.parse(songList.get(position).getAbsolutePath()));
@@ -185,18 +191,24 @@ public class MusicPlayer extends AppCompatActivity {
         if (picture != null) {
             Bitmap bitmapPicture = BitmapFactory.decodeByteArray(picture, 0, picture.length);
             music_img.setImageBitmap(bitmapPicture);
-        } else
-            if (bitmap != null)
-                music_img.setImageBitmap(bitmap);
-            else
-                music_img.setImageResource(R.drawable.placeholder);
-        music_img.startAnimation(animation);
+        } else if (bitmap != null)
+            music_img.setImageBitmap(bitmap);
+        else
+            music_img.setImageResource(R.drawable.placeholder);
+        anim = ObjectAnimator.ofFloat(music_img, "rotation", 0, 360);
+        anim.setInterpolator(null);
+        anim.setDuration(10000);
+        anim.setRepeatCount(ValueAnimator.INFINITE);
+        anim.start();
+//        music_img.startAnimation(animation);
     }
+
     private void setTimesTotal() {
         SimpleDateFormat format = new SimpleDateFormat("mm:ss");
-        timesTotal.setText(format.format(mediaPlayer.getDuration())+"");
+        timesTotal.setText(format.format(mediaPlayer.getDuration()) + "");
         seekBar.setMax(mediaPlayer.getDuration());
     }
+
     private void updateTimeSong() {
         final Handler handler = new Handler();
         handler.postDelayed(new Runnable() {
@@ -228,6 +240,7 @@ public class MusicPlayer extends AppCompatActivity {
             }
         }, 100);
     }
+
     private void updateTimeSongRandom() {
         final Handler handler = new Handler();
         handler.postDelayed(new Runnable() {
@@ -251,6 +264,7 @@ public class MusicPlayer extends AppCompatActivity {
         }
         return null;
     }
+
     private void randomNextSong() {
         random = new Random();
         int randomIndex = random.nextInt(songList.size());
@@ -273,11 +287,10 @@ public class MusicPlayer extends AppCompatActivity {
             if (picture != null) {
                 Bitmap bitmapPicture = BitmapFactory.decodeByteArray(picture, 0, picture.length);
                 music_img.setImageBitmap(bitmapPicture);
-            } else
-                if (bitmap != null)
-                    music_img.setImageBitmap(bitmap);
-                else
-                    music_img.setImageResource(R.drawable.placeholder);
+            } else if (bitmap != null)
+                music_img.setImageBitmap(bitmap);
+            else
+                music_img.setImageResource(R.drawable.placeholder);
             pausePlay.setImageResource(R.drawable.baseline_pause_24);
             setTimesTotal();
             updateTimeSong();
