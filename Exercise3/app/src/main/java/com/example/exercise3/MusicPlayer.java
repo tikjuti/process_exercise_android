@@ -14,6 +14,7 @@ import android.view.animation.AnimationUtils;
 import android.widget.ImageView;
 import android.widget.SeekBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
@@ -21,6 +22,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Random;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 
@@ -28,7 +30,7 @@ public class MusicPlayer extends AppCompatActivity {
 
     TextView title, times,timesTotal;
     SeekBar seekBar;
-    ImageView next, pausePlay, previous, back, repeat;
+    ImageView next, pausePlay, previous, back, repeat, randomPlay;
     CircleImageView music_img;
     ArrayList<File> songList;
 
@@ -36,6 +38,9 @@ public class MusicPlayer extends AppCompatActivity {
     int position = 0;
     Animation animation;
     private boolean isRepeat = false;
+    private boolean isRandom = false;
+    Random random;
+    private int currentSong;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -52,16 +57,17 @@ public class MusicPlayer extends AppCompatActivity {
         timesTotal = findViewById(R.id.timesTotal);
         back = findViewById(R.id.back);
         repeat = findViewById(R.id.repeat);
+        randomPlay = findViewById(R.id.randomPlay);
         animation = AnimationUtils.loadAnimation(this, R.anim.disc_rotate);
 
         Intent intent = getIntent();
         if (intent.hasExtra("listMusic")) {
             songList = (ArrayList<File>) intent.getSerializableExtra("listMusic");
+            initPlayer();
+            setTimesTotal();
+            updateTimeSong();
         }
 
-        initPlayer();
-        setTimesTotal();
-        updateTimeSong();
         repeat.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -73,6 +79,24 @@ public class MusicPlayer extends AppCompatActivity {
                 updateTimeSong();
             }
         });
+        randomPlay.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                isRandom = !isRandom;
+                    if (mediaPlayer.isPlaying()) {
+                        mediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+                            @Override
+                            public void onCompletion(MediaPlayer mp) {
+                                randomNextSong();
+                            }
+                        });
+                    } else {
+                        randomNextSong();
+                    }
+                    randomPlay.setImageResource(isRandom ? R.drawable.baseline_shuffle_active_24 : R.drawable.baseline_shuffle_24);
+            }
+        });
+
         back.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -155,9 +179,11 @@ public class MusicPlayer extends AppCompatActivity {
         title.setText(customTitle(songList.get(position).getName()));
         MediaMetadataRetriever retriever = new MediaMetadataRetriever();
         retriever.setDataSource(songList.get(position).getAbsolutePath());
-        Bitmap bitmap = retriever.getFrameAtTime(10000000);
+        Bitmap bitmap = retriever.getFrameAtTime(6000000);
         if (bitmap != null)
-        music_img.setImageBitmap(bitmap);
+            music_img.setImageBitmap(bitmap);
+        else
+            music_img.setImageResource(R.drawable.placeholder);
         music_img.startAnimation(animation);
     }
     private void setTimesTotal() {
@@ -173,23 +199,37 @@ public class MusicPlayer extends AppCompatActivity {
                 SimpleDateFormat format = new SimpleDateFormat("mm:ss");
                 times.setText(format.format(mediaPlayer.getCurrentPosition()));
                 seekBar.setProgress(mediaPlayer.getCurrentPosition());
-                mediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
-                    @Override
-                    public void onCompletion(MediaPlayer mp) {
-                        position++;
-                        if (position > songList.size()-1){
-                            position = 0;
+                if (!isRandom) {
+                    mediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+                        @Override
+                        public void onCompletion(MediaPlayer mp) {
+                            position++;
+                            if (position > songList.size() - 1) {
+                                position = 0;
+                            }
+                            if (mediaPlayer.isPlaying()) {
+                                mediaPlayer.stop();
+                            }
+                            initPlayer();
+                            mediaPlayer.start();
+                            pausePlay.setImageResource(R.drawable.baseline_pause_24);
+                            setTimesTotal();
+                            updateTimeSong();
                         }
-                        if (mediaPlayer.isPlaying()) {
-                            mediaPlayer.stop();
-                        }
-                        initPlayer();
-                        mediaPlayer.start();
-                        pausePlay.setImageResource(R.drawable.baseline_pause_24);
-                        setTimesTotal();
-                        updateTimeSong();
-                    }
-                });
+                    });
+                }
+                handler.postDelayed(this, 500);
+            }
+        }, 100);
+    }
+    private void updateTimeSongRandom() {
+        final Handler handler = new Handler();
+        handler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                SimpleDateFormat format = new SimpleDateFormat("mm:ss");
+                times.setText(format.format(mediaPlayer.getCurrentPosition()));
+                seekBar.setProgress(mediaPlayer.getCurrentPosition());
                 handler.postDelayed(this, 500);
             }
         }, 100);
@@ -204,5 +244,32 @@ public class MusicPlayer extends AppCompatActivity {
             }
         }
         return null;
+    }
+    private void randomNextSong() {
+        random = new Random();
+        int randomIndex = random.nextInt(songList.size());
+        position = randomIndex;
+
+        try {
+            mediaPlayer.reset();
+            mediaPlayer.setDataSource(getApplicationContext(), Uri.parse(songList.get(position).getAbsolutePath()));
+            mediaPlayer.prepare();
+            mediaPlayer.start();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        if (isRandom) {
+            title.setText(customTitle(songList.get(position).getName()));
+            MediaMetadataRetriever retriever = new MediaMetadataRetriever();
+            retriever.setDataSource(songList.get(position).getAbsolutePath());
+            Bitmap bitmap = retriever.getFrameAtTime(6000000);
+            if (bitmap != null)
+                music_img.setImageBitmap(bitmap);
+            else
+                music_img.setImageResource(R.drawable.placeholder);
+            pausePlay.setImageResource(R.drawable.baseline_pause_24);
+            setTimesTotal();
+            updateTimeSong();
+        }
     }
 }

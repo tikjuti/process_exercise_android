@@ -5,6 +5,8 @@ import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.drawable.Drawable;
 import android.media.MediaMetadataRetriever;
 import android.os.Bundle;
 import android.os.Environment;
@@ -111,10 +113,6 @@ public class Exercise3 extends AppCompatActivity {
                     } else {
                         Toast.makeText(Exercise3.this, "This is not file music", Toast.LENGTH_SHORT).show();
                     }
-//                    MediaMetadataRetriever retriever = new MediaMetadataRetriever();
-//                    retriever.setDataSource(selectedFile.getAbsolutePath());
-//                    String albumName = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ARTIST);
-//                    Toast.makeText(Exercise3.this, albumName, Toast.LENGTH_LONG).show();
                 }
             }
         });
@@ -144,6 +142,11 @@ public class Exercise3 extends AppCompatActivity {
                     Bitmap bitmap = retriever.getFrameAtTime(10000000);
                     if (bitmap != null)
                     item.setAlbumImage(bitmap);
+                    else {
+                        int drawableId = R.drawable.placeholder;
+                        Bitmap bitmapR = BitmapFactory.decodeResource(this.getResources(), drawableId);
+                        item.setAlbumImage(bitmapR);
+                    }
                     String albumName = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ALBUM);
                     if (albumName != null)
                         item.setAlbumName(albumName);
