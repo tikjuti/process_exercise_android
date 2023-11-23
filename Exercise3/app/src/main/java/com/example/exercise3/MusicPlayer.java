@@ -11,15 +11,18 @@ import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Parcelable;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.SeekBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
 import java.io.File;
+import java.io.Serializable;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Random;
@@ -31,8 +34,8 @@ public class MusicPlayer extends AppCompatActivity {
     SeekBar seekBar;
     ImageView next, pausePlay, previous, back, repeat, randomPlay;
     CircleImageView music_img;
-    ArrayList<File> songList;
-    MediaPlayer mediaPlayer;
+    ArrayList<File> songList = new ArrayList<>();
+    static MediaPlayer mediaPlayer = new MediaPlayer();
     int position = 0;
     private ObjectAnimator anim;
     private boolean isRepeat = false;
@@ -57,15 +60,39 @@ public class MusicPlayer extends AppCompatActivity {
         randomPlay = findViewById(R.id.randomPlay);
         anim = ObjectAnimator.ofFloat(music_img, "rotation", 0, 360);
         anim.setInterpolator(null);
-        anim.setDuration(10000);
+        anim.setDuration(30000);
         anim.setRepeatCount(ValueAnimator.INFINITE);
+
 
         Intent intent = getIntent();
         if (intent.hasExtra("listMusic")) {
+            mediaPlayer = Exercise3.mediaPlayer;
+            if(mediaPlayer.isPlaying())
+                mediaPlayer.stop();
             songList = (ArrayList<File>) intent.getSerializableExtra("listMusic");
             initPlayer();
             setTimesTotal();
             updateTimeSong();
+        } else {
+            if (intent.hasExtra("listMusicSliding")) {
+                songList = (ArrayList<File>) intent.getSerializableExtra("listMusicSliding");
+                position = (int) intent.getSerializableExtra("position");
+                title.setText(customTitle(songList.get(position).getName()));
+                MediaMetadataRetriever retriever = new MediaMetadataRetriever();
+                retriever.setDataSource(songList.get(position).getAbsolutePath());
+                Bitmap bitmap = retriever.getFrameAtTime(6000000);
+                byte[] picture = retriever.getEmbeddedPicture();
+                if (picture != null) {
+                    Bitmap bitmapPicture = BitmapFactory.decodeByteArray(picture, 0, picture.length);
+                    music_img.setImageBitmap(bitmapPicture);
+                } else if (bitmap != null)
+                    music_img.setImageBitmap(bitmap);
+                else
+                    music_img.setImageResource(R.drawable.placeholder);
+                anim.start();
+                setTimesTotal();
+                updateTimeSong();
+            }
         }
 
         repeat.setOnClickListener(new View.OnClickListener() {
@@ -100,9 +127,16 @@ public class MusicPlayer extends AppCompatActivity {
         back.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                mediaPlayer.stop();
-                Intent intentBack = new Intent(getApplicationContext(), Exercise3.class);
-                startActivity(intentBack);
+                if(mediaPlayer.isPlaying()) {
+                    int currentPosition = position;
+                    Intent intentBack = new Intent(getApplicationContext(), Exercise3.class);
+                    intentBack.putExtra("currentSong", currentPosition);
+                    intentBack.putExtra("songList", songList);
+                    startActivity(intentBack);
+                } else {
+                    Intent intentBack = new Intent(getApplicationContext(), Exercise3.class);
+                    startActivity(intentBack);
+                }
             }
         });
         next.setOnClickListener(new View.OnClickListener() {
