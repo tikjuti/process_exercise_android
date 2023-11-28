@@ -8,15 +8,14 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.drawable.Drawable;
 import android.media.MediaMetadataRetriever;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.Handler;
 import android.view.View;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -40,13 +39,15 @@ public class Exercise3 extends AppCompatActivity {
     private ListView listView;
     private List<FileSystemModel> directoryEntries = new ArrayList<>();
     private String currentDirectory;
-    private List<File> musicFiles = new ArrayList<>();
-    static MediaPlayer mediaPlayer = new MediaPlayer();
+    private List<File> musicFiles;
+    static MediaPlayer mediaPlayer;
     LinearLayout controls;
     private ObjectAnimator anim;
-    int position;
+    int position = 0;
     ImageView imageMain, previousMain, playMain, nextMain;
     TextView titleMain;
+    private MediaPlayerManager mediaPlayerManager;
+    Intent intent;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -69,21 +70,29 @@ public class Exercise3 extends AppCompatActivity {
         anim.setDuration(30000);
         anim.setRepeatCount(ValueAnimator.INFINITE);
 
-
-        mediaPlayer = MusicPlayer.mediaPlayer;
-        Intent intent = getIntent();
+        intent = getIntent();
         if (intent.hasExtra("currentSong")) {
+            mediaPlayer = MusicPlayer.mediaPlayer;
             position = (int) intent.getSerializableExtra("currentSong");
-            musicFiles = (ArrayList) intent.getSerializableExtra("songList");
-            initPlayer();
+            musicFiles = (ArrayList<File>) intent.getSerializableExtra("songList");
+            titleMain.setText(customTitle(musicFiles.get(position).getName()));
+            MediaMetadataRetriever retriever = new MediaMetadataRetriever();
+            retriever.setDataSource(musicFiles.get(position).getAbsolutePath());
+            Bitmap bitmap = retriever.getFrameAtTime(6000000);
+            byte[] picture = retriever.getEmbeddedPicture();
+            if (picture != null) {
+                Bitmap bitmapPicture = BitmapFactory.decodeByteArray(picture, 0, picture.length);
+                imageMain.setImageBitmap(bitmapPicture);
+            } else if (bitmap != null)
+                imageMain.setImageBitmap(bitmap);
+            else
+                imageMain.setImageResource(R.drawable.placeholder);
+            anim.start();
+            playMain.setImageResource(R.drawable.baseline_pause_24);
+        } else {
+            mediaPlayerManager = MediaPlayerManager.getInstance();
+            mediaPlayer = mediaPlayerManager.getMediaPlayer();
         }
-
-        mediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
-            @Override
-            public void onCompletion(MediaPlayer mp) {
-                initPlayer();
-            }
-        });
 
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, REQUEST_STORAGE_PERMISSION);
@@ -97,11 +106,19 @@ public class Exercise3 extends AppCompatActivity {
         controls.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                musicFiles = (ArrayList) intent.getSerializableExtra("songList");
-                Intent intent = new Intent(getApplicationContext(), MusicPlayer.class);
-                intent.putExtra("listMusicSliding", (ArrayList) musicFiles);
-                intent.putExtra("position", position);
-                startActivity(intent);
+                if (intent.hasExtra("currentSong")) {
+                    mediaPlayer = MusicPlayer.mediaPlayer;
+                    position = (int) intent.getSerializableExtra("currentSong");
+                    musicFiles = (ArrayList<File>) intent.getSerializableExtra("songList");
+                    Intent intent = new Intent(getApplicationContext(), MusicPlayer.class);
+                    intent.putExtra("listMusicSliding", (ArrayList) musicFiles);
+                    intent.putExtra("position", position);
+                    startActivity(intent);
+                }
+                    Intent intent = new Intent(getApplicationContext(), MusicPlayer.class);
+                    intent.putExtra("listMusicSliding", (ArrayList) musicFiles);
+                    intent.putExtra("position", position);
+                    startActivity(intent);
             }
         });
         playMain.setOnClickListener(new View.OnClickListener() {
@@ -121,38 +138,28 @@ public class Exercise3 extends AppCompatActivity {
         nextMain.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                musicFiles = (ArrayList) intent.getSerializableExtra("songList");
                 position++;
                 if (position > musicFiles.size() - 1) {
                     position = 0;
                 }
-                if (mediaPlayer.isPlaying()) {
-                    mediaPlayer.stop();
-                }
+                Toast.makeText(Exercise3.this, position+"", Toast.LENGTH_SHORT).show();
                 initPlayer();
-                mediaPlayer = MediaPlayer.create(Exercise3.this, Uri.parse(musicFiles.get(position).getAbsolutePath()));
-                mediaPlayer.start();
                 playMain.setImageResource(R.drawable.baseline_pause_24);
+                updateNextSong();
             }
         });
         previousMain.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                musicFiles = (ArrayList) intent.getSerializableExtra("songList");
                 position--;
                 if (position < 0) {
                     position = musicFiles.size() - 1;
                 }
-                if (mediaPlayer.isPlaying()) {
-                    mediaPlayer.stop();
-                }
                 initPlayer();
-                mediaPlayer = MediaPlayer.create(Exercise3.this, Uri.parse(musicFiles.get(position).getAbsolutePath()));
-                mediaPlayer.start();
                 playMain.setImageResource(R.drawable.baseline_pause_24);
+                updateNextSong();
             }
         });
-
         buttonUp.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -167,7 +174,6 @@ public class Exercise3 extends AppCompatActivity {
                 }
             }
         });
-
         buttonExit.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -179,9 +185,7 @@ public class Exercise3 extends AppCompatActivity {
             public void onClick(View v) {
                 listMusicFile(currentDirectory);
                 if (musicFiles != null && musicFiles.size() > 0) {
-                    Intent intent = new Intent(getApplicationContext(), MusicPlayer.class);
-                    intent.putExtra("listMusic", (ArrayList) musicFiles);
-                    startActivity(intent);
+                    initPlayer();
                 } else {
                     Toast.makeText(Exercise3.this, "No music files in the current directory", Toast.LENGTH_SHORT).show();
                 }
@@ -190,8 +194,8 @@ public class Exercise3 extends AppCompatActivity {
 
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                FileSystemModel selectedEntry = directoryEntries.get(position);
+            public void onItemClick(AdapterView<?> parent, View view, int positions, long id) {
+                FileSystemModel selectedEntry = directoryEntries.get(positions);
                 String path = selectedEntry.getPath();
                 File selectedFile = new File(path);
                 if (selectedFile.isDirectory()) {
@@ -201,12 +205,26 @@ public class Exercise3 extends AppCompatActivity {
                         throw new RuntimeException(e);
                     }
                 } else {
-                    musicFiles = new ArrayList<>();
-                    musicFiles.add(selectedFile);
-                    if (musicFiles != null && musicFiles.size() > 0 && isMusicFile(selectedFile.getName())) {
-                        Intent intent = new Intent(getApplicationContext(), MusicPlayer.class);
-                        intent.putExtra("listMusic", (ArrayList) musicFiles);
-                        startActivity(intent);
+                    if (isMusicFile(selectedFile.getName())) {
+                        position = positions;
+                        mediaPlayer.stop();
+                        mediaPlayer = MediaPlayer.create(Exercise3.this, Uri.parse(selectedFile.getAbsolutePath()));
+                        mediaPlayer.start();
+                        titleMain.setText(customTitle(selectedFile.getName()));
+                        MediaMetadataRetriever retriever = new MediaMetadataRetriever();
+                        retriever.setDataSource(selectedFile.getAbsolutePath());
+                        Bitmap bitmap = retriever.getFrameAtTime(6000000);
+                        byte[] picture = retriever.getEmbeddedPicture();
+                        if (picture != null) {
+                            Bitmap bitmapPicture = BitmapFactory.decodeByteArray(picture, 0, picture.length);
+                            imageMain.setImageBitmap(bitmapPicture);
+                        } else if (bitmap != null)
+                            imageMain.setImageBitmap(bitmap);
+                        else
+                            imageMain.setImageResource(R.drawable.placeholder);
+                        anim.start();
+                        playMain.setImageResource(R.drawable.baseline_pause_24);
+                        updateNextSong();
                     } else {
                         Toast.makeText(Exercise3.this, "This is not file music", Toast.LENGTH_SHORT).show();
                     }
@@ -280,26 +298,10 @@ public class Exercise3 extends AppCompatActivity {
             }
         }
     }
-
-    private boolean isMusicFile(String fileName) {
-        String[] supportedExtensions = {".mp3", ".wav", ".ogg", ".mp4", ".aac", ".ogg", ".m4a", ".wma", ".aiff"};
-        for (String extension : supportedExtensions) {
-            if (fileName.toLowerCase().endsWith(extension)) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    @SuppressLint("SuspiciousIndentation")
     private void initPlayer() {
-        if (mediaPlayer.isPlaying()) {
-            anim.pause();
-            playMain.setImageResource(R.drawable.baseline_pause_24);
-        } else {
-            anim.resume();
-            playMain.setImageResource(R.drawable.baseline_play_arrow_24);
-        }
+        mediaPlayer.reset();
+        mediaPlayer = MediaPlayer.create(Exercise3.this, Uri.parse(musicFiles.get(position).getAbsolutePath()));
+        mediaPlayer.start();
         titleMain.setText(customTitle(musicFiles.get(position).getName()));
         MediaMetadataRetriever retriever = new MediaMetadataRetriever();
         retriever.setDataSource(musicFiles.get(position).getAbsolutePath());
@@ -313,8 +315,29 @@ public class Exercise3 extends AppCompatActivity {
         else
             imageMain.setImageResource(R.drawable.placeholder);
         anim.start();
+        playMain.setImageResource(R.drawable.baseline_pause_24);
     }
-
+    private void updateNextSong() {
+        final Handler handler = new Handler();
+        handler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                mediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+                    @Override
+                    public void onCompletion(MediaPlayer mp) {
+                        position++;
+                        if (position > musicFiles.size() - 1) {
+                            position = 0;
+                        }
+                        initPlayer();
+                        playMain.setImageResource(R.drawable.baseline_pause_24);
+                        updateNextSong();
+                    }
+                });
+            handler.postDelayed(this, 500);
+            }
+        }, 100);
+    }
     private String customTitle(String fileName) {
         String[] supportedExtensions = {".mp3", ".wav", ".ogg", ".mp4", ".aac", ".ogg", ".m4a", ".wma", ".aiff"};
         for (String extension : supportedExtensions) {
@@ -324,6 +347,15 @@ public class Exercise3 extends AppCompatActivity {
             }
         }
         return null;
+    }
+    private boolean isMusicFile(String fileName) {
+        String[] supportedExtensions = {".mp3", ".wav", ".ogg", ".mp4", ".aac", ".ogg", ".m4a", ".wma", ".aiff"};
+        for (String extension : supportedExtensions) {
+            if (fileName.toLowerCase().endsWith(extension)) {
+                return true;
+            }
+        }
+        return false;
     }
 
 }

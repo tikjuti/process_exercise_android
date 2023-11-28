@@ -47,6 +47,8 @@ public class MusicPlayer extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.music_play);
 
+        mediaPlayer = Exercise3.mediaPlayer;
+
         title = findViewById(R.id.title);
         times = findViewById(R.id.times);
         seekBar = findViewById(R.id.seek_bar);
@@ -65,34 +67,12 @@ public class MusicPlayer extends AppCompatActivity {
 
 
         Intent intent = getIntent();
-        if (intent.hasExtra("listMusic")) {
-            mediaPlayer = Exercise3.mediaPlayer;
-            if(mediaPlayer.isPlaying())
-                mediaPlayer.stop();
-            songList = (ArrayList<File>) intent.getSerializableExtra("listMusic");
+        if (intent.hasExtra("listMusicSliding")) {
+            songList = (ArrayList<File>) intent.getSerializableExtra("listMusicSliding");
+            position = (int) intent.getSerializableExtra("position");
             initPlayer();
             setTimesTotal();
             updateTimeSong();
-        } else {
-            if (intent.hasExtra("listMusicSliding")) {
-                songList = (ArrayList<File>) intent.getSerializableExtra("listMusicSliding");
-                position = (int) intent.getSerializableExtra("position");
-                title.setText(customTitle(songList.get(position).getName()));
-                MediaMetadataRetriever retriever = new MediaMetadataRetriever();
-                retriever.setDataSource(songList.get(position).getAbsolutePath());
-                Bitmap bitmap = retriever.getFrameAtTime(6000000);
-                byte[] picture = retriever.getEmbeddedPicture();
-                if (picture != null) {
-                    Bitmap bitmapPicture = BitmapFactory.decodeByteArray(picture, 0, picture.length);
-                    music_img.setImageBitmap(bitmapPicture);
-                } else if (bitmap != null)
-                    music_img.setImageBitmap(bitmap);
-                else
-                    music_img.setImageResource(R.drawable.placeholder);
-                anim.start();
-                setTimesTotal();
-                updateTimeSong();
-            }
         }
 
         repeat.setOnClickListener(new View.OnClickListener() {
@@ -146,10 +126,9 @@ public class MusicPlayer extends AppCompatActivity {
                 if (position > songList.size() - 1) {
                     position = 0;
                 }
-                if (mediaPlayer.isPlaying()) {
-                    mediaPlayer.stop();
-                }
                 initPlayer();
+                mediaPlayer.reset();
+                mediaPlayer = MediaPlayer.create(MusicPlayer.this, Uri.parse(songList.get(position).getAbsolutePath()));
                 mediaPlayer.start();
                 pausePlay.setImageResource(R.drawable.baseline_pause_24);
                 setTimesTotal();
@@ -163,10 +142,9 @@ public class MusicPlayer extends AppCompatActivity {
                 if (position < 0) {
                     position = songList.size() - 1;
                 }
-                if (mediaPlayer.isPlaying()) {
-                    mediaPlayer.stop();
-                }
                 initPlayer();
+                mediaPlayer.reset();
+                mediaPlayer = MediaPlayer.create(MusicPlayer.this, Uri.parse(songList.get(position).getAbsolutePath()));
                 mediaPlayer.start();
                 pausePlay.setImageResource(R.drawable.baseline_pause_24);
                 setTimesTotal();
@@ -207,10 +185,7 @@ public class MusicPlayer extends AppCompatActivity {
         });
     }
 
-    @SuppressLint("SuspiciousIndentation")
     private void initPlayer() {
-        mediaPlayer = MediaPlayer.create(MusicPlayer.this, Uri.parse(songList.get(position).getAbsolutePath()));
-        mediaPlayer.start();
         title.setText(customTitle(songList.get(position).getName()));
         MediaMetadataRetriever retriever = new MediaMetadataRetriever();
         retriever.setDataSource(songList.get(position).getAbsolutePath());
@@ -223,9 +198,15 @@ public class MusicPlayer extends AppCompatActivity {
             music_img.setImageBitmap(bitmap);
         else
             music_img.setImageResource(R.drawable.placeholder);
-        anim.start();
+        if (mediaPlayer.isPlaying()) {
+            anim.start();
+            pausePlay.setImageResource(R.drawable.baseline_pause_24);
+        }
+        else {
+            anim.resume();
+            pausePlay.setImageResource(R.drawable.baseline_play_arrow_24);
+        }
     }
-
     private void setTimesTotal() {
         SimpleDateFormat format = new SimpleDateFormat("mm:ss");
         timesTotal.setText(format.format(mediaPlayer.getDuration()) + "");
