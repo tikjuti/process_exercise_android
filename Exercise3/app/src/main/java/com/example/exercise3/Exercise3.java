@@ -40,14 +40,18 @@ public class Exercise3 extends AppCompatActivity {
     private List<FileSystemModel> directoryEntries = new ArrayList<>();
     private String currentDirectory;
     private List<File> musicFiles;
+    private List<File> musicFilesTmp;
     static MediaPlayer mediaPlayer;
     LinearLayout controls;
-    private ObjectAnimator anim;
+    static ObjectAnimator anim;
     int position = 0;
     ImageView imageMain, previousMain, playMain, nextMain;
     TextView titleMain;
-    private MediaPlayerManager mediaPlayerManager;
+    static MediaPlayerManager mediaPlayerManager;
     Intent intent;
+    private boolean hasInitializedNext = false;
+    private boolean hasInitializedPrevious = false;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -70,11 +74,17 @@ public class Exercise3 extends AppCompatActivity {
         anim.setDuration(30000);
         anim.setRepeatCount(ValueAnimator.INFINITE);
 
+        mediaPlayerManager = new MediaPlayerManager();
+        mediaPlayer = mediaPlayerManager.getMediaPlayer();
+
         intent = getIntent();
         if (intent.hasExtra("currentSong")) {
-            mediaPlayer = MusicPlayer.mediaPlayer;
+            mediaPlayerManager = MusicPlayer.mediaPlayerManager;
+            mediaPlayer = mediaPlayerManager.getMediaPlayer();
+            musicFiles = mediaPlayerManager.getMusicFiles();
+            mediaPlayerManager.setMusicFiles(musicFiles);
             position = (int) intent.getSerializableExtra("currentSong");
-            musicFiles = (ArrayList<File>) intent.getSerializableExtra("songList");
+            if (mediaPlayer.isPlaying()) {
             titleMain.setText(customTitle(musicFiles.get(position).getName()));
             MediaMetadataRetriever retriever = new MediaMetadataRetriever();
             retriever.setDataSource(musicFiles.get(position).getAbsolutePath());
@@ -88,10 +98,10 @@ public class Exercise3 extends AppCompatActivity {
             else
                 imageMain.setImageResource(R.drawable.placeholder);
             anim.start();
-            playMain.setImageResource(R.drawable.baseline_pause_24);
-        } else {
-            mediaPlayerManager = MediaPlayerManager.getInstance();
-            mediaPlayer = mediaPlayerManager.getMediaPlayer();
+            playMain.setImageResource(R.drawable.baseline_pause_24);}
+            else {
+                unInitPlayer();
+            }
         }
 
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
@@ -106,31 +116,25 @@ public class Exercise3 extends AppCompatActivity {
         controls.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (intent.hasExtra("currentSong")) {
-                    mediaPlayer = MusicPlayer.mediaPlayer;
-                    position = (int) intent.getSerializableExtra("currentSong");
-                    musicFiles = (ArrayList<File>) intent.getSerializableExtra("songList");
-                    Intent intent = new Intent(getApplicationContext(), MusicPlayer.class);
-                    intent.putExtra("listMusicSliding", (ArrayList) musicFiles);
-                    intent.putExtra("position", position);
-                    startActivity(intent);
-                }
-                    Intent intent = new Intent(getApplicationContext(), MusicPlayer.class);
-                    intent.putExtra("listMusicSliding", (ArrayList) musicFiles);
-                    intent.putExtra("position", position);
-                    startActivity(intent);
+                anim.pause();
+                Intent intent = new Intent(getApplicationContext(), MusicPlayer.class);
+                intent.putExtra("position", position);
+                startActivity(intent);
             }
         });
         playMain.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                if (intent.hasExtra("currentSong")) {
+                    mediaPlayerManager = MusicPlayer.mediaPlayerManager;
+                }
                 if (mediaPlayer.isPlaying()) {
                     mediaPlayer.pause();
                     anim.pause();
                     playMain.setImageResource(R.drawable.baseline_play_arrow_24);
                 } else {
                     mediaPlayer.start();
-                    anim.resume();
+                    anim.start();
                     playMain.setImageResource(R.drawable.baseline_pause_24);
                 }
             }
@@ -138,26 +142,43 @@ public class Exercise3 extends AppCompatActivity {
         nextMain.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                if (!hasInitializedNext && intent.hasExtra("currentSong")) {
+                    mediaPlayerManager = MusicPlayer.mediaPlayerManager;
+                    mediaPlayer = mediaPlayerManager.getMediaPlayer();
+                    musicFiles = mediaPlayerManager.getMusicFiles();
+                    position = (int) intent.getSerializableExtra("currentSong");
+                    hasInitializedNext = true;
+                }
+
                 position++;
                 if (position > musicFiles.size() - 1) {
                     position = 0;
                 }
-                Toast.makeText(Exercise3.this, position+"", Toast.LENGTH_SHORT).show();
-                initPlayer();
-                playMain.setImageResource(R.drawable.baseline_pause_24);
-                updateNextSong();
+
+                if(mediaPlayer.isPlaying()) {
+                    mediaPlayer.stop();
+                }
+                 initPlayer();
             }
         });
         previousMain.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                if (!hasInitializedPrevious && intent.hasExtra("currentSong")) {
+                    mediaPlayerManager = MusicPlayer.mediaPlayerManager;
+                    mediaPlayer = mediaPlayerManager.getMediaPlayer();
+                    musicFiles = mediaPlayerManager.getMusicFiles();
+                    position = (int) intent.getSerializableExtra("currentSong");
+                    hasInitializedPrevious = true;
+                }
                 position--;
                 if (position < 0) {
                     position = musicFiles.size() - 1;
                 }
+                if(mediaPlayer.isPlaying()) {
+                    mediaPlayer.stop();
+                }
                 initPlayer();
-                playMain.setImageResource(R.drawable.baseline_pause_24);
-                updateNextSong();
             }
         });
         buttonUp.setOnClickListener(new View.OnClickListener() {
@@ -184,6 +205,8 @@ public class Exercise3 extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 listMusicFile(currentDirectory);
+                musicFilesTmp = musicFiles;
+                mediaPlayerManager.setMusicFiles(musicFilesTmp);
                 if (musicFiles != null && musicFiles.size() > 0) {
                     initPlayer();
                 } else {
@@ -299,9 +322,9 @@ public class Exercise3 extends AppCompatActivity {
         }
     }
     private void initPlayer() {
-        mediaPlayer.reset();
         mediaPlayer = MediaPlayer.create(Exercise3.this, Uri.parse(musicFiles.get(position).getAbsolutePath()));
         mediaPlayer.start();
+        mediaPlayerManager.setMediaPlayer(mediaPlayer);
         titleMain.setText(customTitle(musicFiles.get(position).getName()));
         MediaMetadataRetriever retriever = new MediaMetadataRetriever();
         retriever.setDataSource(musicFiles.get(position).getAbsolutePath());
@@ -316,6 +339,23 @@ public class Exercise3 extends AppCompatActivity {
             imageMain.setImageResource(R.drawable.placeholder);
         anim.start();
         playMain.setImageResource(R.drawable.baseline_pause_24);
+        updateNextSong();
+    }
+    private void unInitPlayer() {
+        titleMain.setText(customTitle(musicFiles.get(position).getName()));
+        MediaMetadataRetriever retriever = new MediaMetadataRetriever();
+        retriever.setDataSource(musicFiles.get(position).getAbsolutePath());
+        Bitmap bitmap = retriever.getFrameAtTime(6000000);
+        byte[] picture = retriever.getEmbeddedPicture();
+        if (picture != null) {
+            Bitmap bitmapPicture = BitmapFactory.decodeByteArray(picture, 0, picture.length);
+            imageMain.setImageBitmap(bitmapPicture);
+        } else if (bitmap != null)
+            imageMain.setImageBitmap(bitmap);
+        else
+            imageMain.setImageResource(R.drawable.placeholder);
+        anim.pause();
+        playMain.setImageResource(R.drawable.baseline_play_arrow_24);
     }
     private void updateNextSong() {
         final Handler handler = new Handler();

@@ -2,7 +2,6 @@ package com.example.exercise3;
 
 import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator;
-import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -11,18 +10,15 @@ import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.Parcelable;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.SeekBar;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
 import java.io.File;
-import java.io.Serializable;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Random;
@@ -34,7 +30,7 @@ public class MusicPlayer extends AppCompatActivity {
     SeekBar seekBar;
     ImageView next, pausePlay, previous, back, repeat, randomPlay;
     CircleImageView music_img;
-    ArrayList<File> songList = new ArrayList<>();
+    ArrayList<File> songList;
     static MediaPlayer mediaPlayer = new MediaPlayer();
     int position = 0;
     private ObjectAnimator anim;
@@ -42,12 +38,12 @@ public class MusicPlayer extends AppCompatActivity {
     private boolean isRandom = false;
     Random random;
 
+    static MediaPlayerManager mediaPlayerManager = new MediaPlayerManager();
+
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.music_play);
-
-        mediaPlayer = Exercise3.mediaPlayer;
 
         title = findViewById(R.id.title);
         times = findViewById(R.id.times);
@@ -60,19 +56,25 @@ public class MusicPlayer extends AppCompatActivity {
         back = findViewById(R.id.back);
         repeat = findViewById(R.id.repeat);
         randomPlay = findViewById(R.id.randomPlay);
+
         anim = ObjectAnimator.ofFloat(music_img, "rotation", 0, 360);
         anim.setInterpolator(null);
         anim.setDuration(30000);
         anim.setRepeatCount(ValueAnimator.INFINITE);
 
 
+        mediaPlayerManager = Exercise3.mediaPlayerManager;
+
         Intent intent = getIntent();
-        if (intent.hasExtra("listMusicSliding")) {
-            songList = (ArrayList<File>) intent.getSerializableExtra("listMusicSliding");
+        if(intent.hasExtra("position")) {
+            mediaPlayer = mediaPlayerManager.getMediaPlayer();
             position = (int) intent.getSerializableExtra("position");
-            initPlayer();
-            setTimesTotal();
-            updateTimeSong();
+            songList = (ArrayList<File>) mediaPlayerManager.getMusicFiles();
+            if (mediaPlayer.isPlaying())
+                initPlayer();
+            else {
+                unInitPlayer();
+            }
         }
 
         repeat.setOnClickListener(new View.OnClickListener() {
@@ -107,16 +109,12 @@ public class MusicPlayer extends AppCompatActivity {
         back.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(mediaPlayer.isPlaying()) {
-                    int currentPosition = position;
-                    Intent intentBack = new Intent(getApplicationContext(), Exercise3.class);
-                    intentBack.putExtra("currentSong", currentPosition);
-                    intentBack.putExtra("songList", songList);
-                    startActivity(intentBack);
-                } else {
-                    Intent intentBack = new Intent(getApplicationContext(), Exercise3.class);
-                    startActivity(intentBack);
-                }
+                mediaPlayerManager.setMediaPlayer(mediaPlayer);
+                mediaPlayerManager.setMusicFiles(songList);
+                int currentPosition = position;
+                Intent intentBack = new Intent(getApplicationContext(), Exercise3.class);
+                intentBack.putExtra("currentSong", currentPosition);
+                startActivity(intentBack);
             }
         });
         next.setOnClickListener(new View.OnClickListener() {
@@ -157,12 +155,10 @@ public class MusicPlayer extends AppCompatActivity {
             public void onClick(View v) {
                 if (mediaPlayer.isPlaying()) {
                     mediaPlayer.pause();
-                    anim.pause();
-                    pausePlay.setImageResource(R.drawable.baseline_play_arrow_24);
+                    unInitPlayer();
                 } else {
                     mediaPlayer.start();
-                    anim.resume();
-                    pausePlay.setImageResource(R.drawable.baseline_pause_24);
+                    initPlayer();
                 }
             }
         });
@@ -198,14 +194,28 @@ public class MusicPlayer extends AppCompatActivity {
             music_img.setImageBitmap(bitmap);
         else
             music_img.setImageResource(R.drawable.placeholder);
-        if (mediaPlayer.isPlaying()) {
-            anim.start();
-            pausePlay.setImageResource(R.drawable.baseline_pause_24);
-        }
-        else {
-            anim.resume();
-            pausePlay.setImageResource(R.drawable.baseline_play_arrow_24);
-        }
+        anim.start();
+        pausePlay.setImageResource(R.drawable.baseline_pause_24);
+        setTimesTotal();
+        updateTimeSong();
+    }
+    private void unInitPlayer() {
+        title.setText(customTitle(songList.get(position).getName()));
+        MediaMetadataRetriever retriever = new MediaMetadataRetriever();
+        retriever.setDataSource(songList.get(position).getAbsolutePath());
+        Bitmap bitmap = retriever.getFrameAtTime(6000000);
+        byte[] picture = retriever.getEmbeddedPicture();
+        if (picture != null) {
+            Bitmap bitmapPicture = BitmapFactory.decodeByteArray(picture, 0, picture.length);
+            music_img.setImageBitmap(bitmapPicture);
+        } else if (bitmap != null)
+            music_img.setImageBitmap(bitmap);
+        else
+            music_img.setImageResource(R.drawable.placeholder);
+        anim.pause();
+        pausePlay.setImageResource(R.drawable.baseline_play_arrow_24);
+        setTimesTotal();
+        updateTimeSong();
     }
     private void setTimesTotal() {
         SimpleDateFormat format = new SimpleDateFormat("mm:ss");
@@ -229,14 +239,10 @@ public class MusicPlayer extends AppCompatActivity {
                             if (position > songList.size() - 1) {
                                 position = 0;
                             }
-                            if (mediaPlayer.isPlaying()) {
-                                mediaPlayer.stop();
-                            }
-                            initPlayer();
+                            mediaPlayer.reset();
+                            mediaPlayer = MediaPlayer.create(MusicPlayer.this, Uri.parse(songList.get(position).getAbsolutePath()));
                             mediaPlayer.start();
-                            pausePlay.setImageResource(R.drawable.baseline_pause_24);
-                            setTimesTotal();
-                            updateTimeSong();
+                            initPlayer();
                         }
                     });
                 }
@@ -258,9 +264,12 @@ public class MusicPlayer extends AppCompatActivity {
 
     private void randomNextSong() {
         random = new Random();
-        int randomIndex = random.nextInt(songList.size());
+        int currentSong = position;
+        int randomIndex;
+        do {
+            randomIndex = random.nextInt(songList.size());
+        } while (randomIndex == currentSong);
         position = randomIndex;
-
         try {
             mediaPlayer.reset();
             mediaPlayer.setDataSource(getApplicationContext(), Uri.parse(songList.get(position).getAbsolutePath()));
@@ -270,21 +279,8 @@ public class MusicPlayer extends AppCompatActivity {
             e.printStackTrace();
         }
         if (isRandom) {
-            title.setText(customTitle(songList.get(position).getName()));
-            MediaMetadataRetriever retriever = new MediaMetadataRetriever();
-            retriever.setDataSource(songList.get(position).getAbsolutePath());
-            Bitmap bitmap = retriever.getFrameAtTime(6000000);
-            byte[] picture = retriever.getEmbeddedPicture();
-            if (picture != null) {
-                Bitmap bitmapPicture = BitmapFactory.decodeByteArray(picture, 0, picture.length);
-                music_img.setImageBitmap(bitmapPicture);
-            } else if (bitmap != null)
-                music_img.setImageBitmap(bitmap);
-            else
-                music_img.setImageResource(R.drawable.placeholder);
-            pausePlay.setImageResource(R.drawable.baseline_pause_24);
-            setTimesTotal();
-            updateTimeSong();
+            initPlayer();
         }
     }
+
 }
