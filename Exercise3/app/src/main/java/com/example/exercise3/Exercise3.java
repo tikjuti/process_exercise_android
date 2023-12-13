@@ -14,6 +14,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
+import android.os.Process;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.Button;
@@ -116,7 +117,6 @@ public class Exercise3 extends AppCompatActivity {
         controls.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                anim.pause();
                 Intent intent = new Intent(getApplicationContext(), MusicPlayer.class);
                 intent.putExtra("position", position);
                 startActivity(intent);
@@ -198,14 +198,19 @@ public class Exercise3 extends AppCompatActivity {
         buttonExit.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                finish();
+                if(mediaPlayer.isPlaying())
+                    mediaPlayer.stop();
+                finishAffinity();
             }
         });
         buttonSelect.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                position = 0;
                 listMusicFile(currentDirectory);
                 musicFilesTmp = musicFiles;
+                if(mediaPlayer != null && mediaPlayer.isPlaying())
+                    mediaPlayer.stop();
                 mediaPlayerManager.setMusicFiles(musicFilesTmp);
                 if (musicFiles != null && musicFiles.size() > 0) {
                     initPlayer();
@@ -230,9 +235,14 @@ public class Exercise3 extends AppCompatActivity {
                 } else {
                     if (isMusicFile(selectedFile.getName())) {
                         position = positions;
-                        mediaPlayer.stop();
+                        listMusicFile(currentDirectory);
+                        if (mediaPlayer != null && mediaPlayer.isPlaying()) {
+                            mediaPlayer.stop();
+                        }
                         mediaPlayer = MediaPlayer.create(Exercise3.this, Uri.parse(selectedFile.getAbsolutePath()));
                         mediaPlayer.start();
+                        mediaPlayerManager.setMediaPlayer(mediaPlayer);
+                        mediaPlayerManager.setMusicFiles(musicFiles);
                         titleMain.setText(customTitle(selectedFile.getName()));
                         MediaMetadataRetriever retriever = new MediaMetadataRetriever();
                         retriever.setDataSource(selectedFile.getAbsolutePath());
@@ -241,10 +251,11 @@ public class Exercise3 extends AppCompatActivity {
                         if (picture != null) {
                             Bitmap bitmapPicture = BitmapFactory.decodeByteArray(picture, 0, picture.length);
                             imageMain.setImageBitmap(bitmapPicture);
-                        } else if (bitmap != null)
+                        } else if (bitmap != null) {
                             imageMain.setImageBitmap(bitmap);
-                        else
+                        } else {
                             imageMain.setImageResource(R.drawable.placeholder);
+                        }
                         anim.start();
                         playMain.setImageResource(R.drawable.baseline_pause_24);
                         updateNextSong();
@@ -398,4 +409,9 @@ public class Exercise3 extends AppCompatActivity {
         return false;
     }
 
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        Process.killProcess(Process.myPid());
+    }
 }
