@@ -70,13 +70,16 @@ public class MusicPlayer extends AppCompatActivity {
             mediaPlayer = mediaPlayerManager.getMediaPlayer();
             position = (int) intent.getSerializableExtra("position");
             songList = (ArrayList<File>) mediaPlayerManager.getMusicFiles();
-            if (mediaPlayer.isPlaying())
+            if (mediaPlayer.isPlaying()) {
                 initPlayer();
+            }
             else {
                 unInitPlayer();
             }
+            updateTimeSong();
         }
 
+        updateTimeSong();
         repeat.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -97,6 +100,7 @@ public class MusicPlayer extends AppCompatActivity {
                         @Override
                         public void onCompletion(MediaPlayer mp) {
                             randomNextSong();
+                            updateTimeSong();
                         }
                     });
                 } else {
@@ -243,6 +247,7 @@ public class MusicPlayer extends AppCompatActivity {
                             mediaPlayer = MediaPlayer.create(MusicPlayer.this, Uri.parse(songList.get(position).getAbsolutePath()));
                             mediaPlayer.start();
                             initPlayer();
+                            updateTimeSong();
                         }
                     });
                 }

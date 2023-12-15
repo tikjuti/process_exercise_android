@@ -211,6 +211,7 @@ public class Exercise3 extends AppCompatActivity {
                 musicFilesTmp = musicFiles;
                 if(mediaPlayer != null && mediaPlayer.isPlaying())
                     mediaPlayer.stop();
+                mediaPlayerManager.setMediaPlayer(mediaPlayer);
                 mediaPlayerManager.setMusicFiles(musicFilesTmp);
                 if (musicFiles != null && musicFiles.size() > 0) {
                     initPlayer();
