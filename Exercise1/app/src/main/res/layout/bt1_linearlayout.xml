@@ -4,11 +4,13 @@
     android:layout_height="match_parent"
     xmlns:tools="http://schemas.android.com/tools"
     android:orientation="vertical"
+    android:weightSum="6"
     tools:context=".LinearLayout">
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:weightSum="5"
+        android:layout_weight="5"
         android:orientation="horizontal">
         <LinearLayout
             android:layout_width="0dp"
@@ -59,6 +61,7 @@
         android:id="@+id/seek_bar"
         android:layout_width="match_parent"
         android:layout_height="30dp"
+        android:layout_weight="1"
         android:max="99"
         android:min="11"
         android:progress="0"></SeekBar>
