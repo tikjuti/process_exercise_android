@@ -100,7 +100,6 @@ public class MusicPlayer extends AppCompatActivity {
                         @Override
                         public void onCompletion(MediaPlayer mp) {
                             randomNextSong();
-                            updateTimeSong();
                         }
                     });
                 } else {
@@ -280,6 +279,8 @@ public class MusicPlayer extends AppCompatActivity {
             mediaPlayer.setDataSource(getApplicationContext(), Uri.parse(songList.get(position).getAbsolutePath()));
             mediaPlayer.prepare();
             mediaPlayer.start();
+            initPlayer();
+            updateTimeSong();
         } catch (Exception e) {
             e.printStackTrace();
         }
