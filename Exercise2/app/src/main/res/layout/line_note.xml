@@ -14,17 +14,20 @@
         android:layout_height="wrap_content"
         android:textStyle="bold"
         android:maxLines="1"
+        android:textColor="@color/black"
         android:textSize="20sp" />
     <TextView android:id="@+id/txtTextTime"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:maxLines="1"
         android:textAlignment="textEnd"
+        android:textColor="@color/black"
         android:textSize="16sp" />
     <TextView android:id="@+id/txtTextContent"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:ellipsize="end"
         android:maxLines="2"
+        android:textColor="@color/black"
         android:textSize="16sp" />
 </LinearLayout>

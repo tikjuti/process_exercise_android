@@ -70,10 +70,21 @@ public class UpdateNote extends AppCompatActivity {
         Bundle bundle = getIntent().getExtras();
 
         int id = bundle.getInt("id");
-        String title = bundle.getString("title");
+         SQLiteDatabase db = database.getReadableDatabase();
+        Cursor dataById = db.query("Notes", null, "Id = ?", new String[]{String.valueOf(id)}, null, null, null);
+        String title = "",content ="", dateTime="";
+        byte[] imagePath = new byte[1024];
+
+        while (dataById.moveToNext()) {
+            title = dataById.getString(1);
+            content = dataById.getString(2);
+            imagePath = dataById.getBlob(3);
+            dateTime = dataById.getString(4);
+        }
+     /*   String title = bundle.getString("title");
         String content = bundle.getString("content");
         byte[] imagePath = bundle.getByteArray("imagePath");
-        String dateTime = bundle.getString("dateTime");
+        String dateTime = bundle.getString("dateTime");*/
 
         editNoteTitle.setText(title);
         editNoteContent.setText(content);
@@ -129,6 +140,7 @@ public class UpdateNote extends AppCompatActivity {
             }
         });
 
+        String finalDateTime = dateTime;
         btnEditSaveNote.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -151,7 +163,7 @@ public class UpdateNote extends AppCompatActivity {
                     }
                 }
 
-                database.updateData(id, newTitle, newContent, imagePath, dateTime);
+                database.updateData(id, newTitle, newContent, imagePath, finalDateTime);
                 Toast.makeText(UpdateNote.this, "Đã cập nhật", Toast.LENGTH_LONG).show();
                 MainNote.getTitleData();
                 Intent intent = new Intent(getApplicationContext(), MainNote.class);
@@ -164,6 +176,28 @@ public class UpdateNote extends AppCompatActivity {
             public void onClick(View view) {
                 Intent intent = new Intent(getApplicationContext(), MainNote.class);
                 startActivity(intent);
+            }
+        });
+        noteEditImage.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View v) {
+                AlertDialog.Builder dialog = new AlertDialog.Builder(UpdateNote.this);
+                dialog.setMessage("Bạn chắc muốn xóa?");
+                dialog.setPositiveButton("Có", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        Bitmap bitmap = BitmapFactory.decodeByteArray(new byte[1024],0 ,new byte[1024].length);
+                        noteEditImage.setImageBitmap(bitmap);
+                    }
+                });
+                dialog.setNegativeButton("Không", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+
+                    }
+                });
+                dialog.show();
+                return true;
             }
         });
     }

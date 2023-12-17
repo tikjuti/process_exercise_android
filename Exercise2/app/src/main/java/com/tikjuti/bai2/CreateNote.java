@@ -1,7 +1,9 @@
 package com.tikjuti.bai2;
 
 import android.annotation.SuppressLint;
+import android.app.AlertDialog;
 import android.content.ContentValues;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
@@ -79,7 +81,28 @@ public class CreateNote extends AppCompatActivity {
                 startActivityForResult(pickPhotoIntent, REQ_PICK_IMAGE);
             }
         });
+        noteImage.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View v) {
+                AlertDialog.Builder dialog = new AlertDialog.Builder(CreateNote.this);
+                dialog.setMessage("Bạn chắc muốn xóa?");
+                dialog.setPositiveButton("Có", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        Bitmap bitmap = BitmapFactory.decodeByteArray(new byte[1024],0 ,new byte[1024].length);
+                        noteImage.setImageBitmap(bitmap);
+                    }
+                });
+                dialog.setNegativeButton("Không", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
 
+                    }
+                });
+                dialog.show();
+                return true;
+            }
+        });
         btnSaveNote.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {

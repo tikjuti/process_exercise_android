@@ -106,7 +106,7 @@ public class MainNote extends AppCompatActivity {
     }
     public void updateNote(int id) {
 
-        SQLiteDatabase db = database.getReadableDatabase();
+       /* SQLiteDatabase db = database.getReadableDatabase();
         Cursor dataById = db.query("Notes", null, "Id = ?", new String[]{String.valueOf(id)}, null, null, null);
         String title = "",content ="", dateTime="";
         byte[] imagePath = new byte[1024];
@@ -116,17 +116,17 @@ public class MainNote extends AppCompatActivity {
             content = dataById.getString(2);
             imagePath = dataById.getBlob(3);
             dateTime = dataById.getString(4);
-        }
+        }*/
         Intent iGetContactInfo = new Intent(getApplicationContext(), UpdateNote.class);
         Bundle bundle = new Bundle();
         bundle.putInt("id", id);
-        bundle.putString("title", title);
+       /* bundle.putString("title", title);
         bundle.putString("content", content);
         bundle.putByteArray("imagePath", imagePath);
-        bundle.putString("dateTime", dateTime);
+        bundle.putString("dateTime", dateTime);*/
         iGetContactInfo.putExtras(bundle);
 
         startActivity(iGetContactInfo);
-    }
+        }
 
     }
